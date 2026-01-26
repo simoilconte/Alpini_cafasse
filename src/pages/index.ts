@@ -1,0 +1,12 @@
+export { LoginPage } from './LoginPage';
+export { DashboardPage } from './DashboardPage';
+export { SociPage } from './SociPage';
+export { SocioNewPage } from './SocioNewPage';
+export { SocioEditPage } from './SocioEditPage';
+export { SocioDetailPage } from './SocioDetailPage';
+export { StatusAssociativiPage } from './StatusAssociativiPage';
+export { BorseSpesaPage } from './BorseSpesaPage';
+export { FamiglieBeneficiariePage } from './FamiglieBeneficiariePage';
+export { FamigliaDetailPage } from './FamigliaDetailPage';
+export { BorseSpesaSettingsPage } from './BorseSpesaSettingsPage';
+export { RegistroConsegnePage } from './RegistroConsegnePage';
