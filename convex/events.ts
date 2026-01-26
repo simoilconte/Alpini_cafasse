@@ -22,7 +22,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import type { Id, Doc } from "./_generated/dataModel";
-import type { MutationCtx, QueryCtx } from "./_generated/server";
+import type { MutationCtx } from "./_generated/server";
 import {
   requireAdminOrDirettivo,
   requireAuth,

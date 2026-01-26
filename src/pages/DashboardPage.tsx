@@ -195,7 +195,8 @@ function ListSkeleton() {
 
 export function DashboardPage() {
   const profile = useQuery(api.profiles.getCurrentProfile);
-  const memberCount = useQuery(api.members.getMemberCount);
+  const activeCount = useQuery(api.members.getMemberCount, { socioAttivo: true });
+  const totalCount = useQuery(api.members.getMemberCount, {});
   
   // Dashboard stats - only for admin/direttivo
   const dashboardStats = useQuery(api.memberships.getDashboardStats, {});
@@ -225,8 +226,8 @@ export function DashboardPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatCard
             title="Soci Attivi"
-            value={memberCount?.activeCount ?? '-'}
-            loading={memberCount === undefined}
+            value={activeCount ?? '-'}
+            loading={activeCount === undefined}
             color="blue"
             linkTo="/soci"
             icon={
@@ -280,8 +281,8 @@ export function DashboardPage() {
             <>
               <StatCard
                 title="Totale Soci"
-                value={memberCount?.totalCount ?? '-'}
-                loading={memberCount === undefined}
+                value={totalCount ?? '-'}
+                loading={totalCount === undefined}
                 color="purple"
                 icon={
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

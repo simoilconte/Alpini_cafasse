@@ -201,20 +201,15 @@ export function EventoDetailPage() {
   const [selectedMemberId, setSelectedMemberId] = useState<string>('');
 
   const event = useQuery(api.events.getEvent, id ? { eventId: id as Id<"events"> } : "skip");
-  // @ts-expect-error - API will be generated after running npx convex dev
-  const participants = useQuery(api.eventParticipants?.getEventParticipants, id ? { eventId: id as Id<"events"> } : "skip");
-  // @ts-expect-error - API will be generated after running npx convex dev
-  const availableMembers = useQuery(api.eventParticipants?.getAvailableMembers, id ? { eventId: id as Id<"events"> } : "skip");
+  const participants = useQuery(api.eventParticipants.getEventParticipants, id ? { eventId: id as Id<"events"> } : "skip");
+  const availableMembers = useQuery(api.eventParticipants.getAvailableMembers, id ? { eventId: id as Id<"events"> } : "skip");
   const profile = useQuery(api.profiles.getCurrentProfile);
 
   const closeEvent = useMutation(api.events.closeEvent);
   const deleteEvent = useMutation(api.events.deleteEvent);
-  // @ts-expect-error - API will be generated after running npx convex dev
-  const addParticipant = useMutation(api.eventParticipants?.addParticipant);
-  // @ts-expect-error - API will be generated after running npx convex dev
-  const removeParticipant = useMutation(api.eventParticipants?.removeParticipant);
-  // @ts-expect-error - API will be generated after running npx convex dev
-  const updateParticipant = useMutation(api.eventParticipants?.updateParticipant);
+  const addParticipant = useMutation(api.eventParticipants.addParticipant);
+  const removeParticipant = useMutation(api.eventParticipants.removeParticipant);
+  const updateParticipant = useMutation(api.eventParticipants.updateParticipant);
 
   const canEdit = profile?.role === 'admin' || profile?.role === 'direttivo';
   const isLoading = event === undefined;
