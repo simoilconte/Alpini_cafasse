@@ -51,7 +51,8 @@ export function LoginPage() {
       console.log("Chiamando signIn...");
       await signIn("password", formData);
       console.log("signIn completato con successo!");
-      // On success, the Authenticated component in App.tsx will handle the redirect
+      // Forza redirect alla home dopo login riuscito
+      window.location.href = "/";
     } catch (err) {
       console.error("Login error:", err);
       const errorMessage = err instanceof Error ? err.message : String(err);
