@@ -120,7 +120,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           fixed top-0 left-0 z-50 h-screen w-64 bg-[#2D2D2D] text-white
           transform transition-transform duration-300 ease-in-out
           flex flex-col
-          lg:translate-x-0 lg:static lg:z-auto
+          lg:translate-x-0 lg:sticky lg:top-0 lg:z-auto lg:h-screen
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
