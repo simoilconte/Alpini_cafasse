@@ -79,6 +79,7 @@ export function SocioNewPage() {
     sesso?: 'M' | 'F'; 
     luogoNascita?: string; 
     codiceCatastale?: string;
+    dataIscrizione?: string;
   }) => {
     setIsLoading(true);
     setToast(null);
@@ -90,6 +91,7 @@ export function SocioNewPage() {
         cognome: data.cognome,
         codiceFiscale: data.codiceFiscale.toUpperCase(),
         dataNascita: data.dataNascita,
+        dataIscrizione: data.dataIscrizione || undefined,
         sesso: data.sesso || undefined,
         luogoNascita: data.luogoNascita || undefined,
         codiceCatastale: data.codiceCatastale || undefined,

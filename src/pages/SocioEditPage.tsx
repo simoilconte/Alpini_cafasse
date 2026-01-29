@@ -163,6 +163,7 @@ export function SocioEditPage() {
     sesso?: 'M' | 'F'; 
     luogoNascita?: string; 
     codiceCatastale?: string;
+    dataIscrizione?: string;
   }) => {
     if (!id) return;
     
@@ -177,6 +178,7 @@ export function SocioEditPage() {
         cognome: data.cognome,
         codiceFiscale: data.codiceFiscale.toUpperCase(),
         dataNascita: data.dataNascita,
+        dataIscrizione: data.dataIscrizione || undefined,
         sesso: data.sesso || undefined,
         luogoNascita: data.luogoNascita || undefined,
         codiceCatastale: data.codiceCatastale || undefined,
