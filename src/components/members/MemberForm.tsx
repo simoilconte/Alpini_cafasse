@@ -60,6 +60,7 @@ export function MemberForm({
       cognome: initialData?.cognome ?? '',
       codiceFiscale: initialData?.codiceFiscale ?? '',
       dataNascita: initialData?.dataNascita ?? '',
+      dataIscrizione: (initialData as any)?.dataIscrizione ?? '',
       email: initialData?.email ?? '',
       telefono: initialData?.telefono ?? '',
       indirizzo: initialData?.indirizzo ?? '',
@@ -386,6 +387,16 @@ export function MemberForm({
       <div className="card">
         <h3 className="text-lg font-semibold text-slate-900 mb-4">Stato Associativo</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="dataIscrizione" className="label">Data di Iscrizione</label>
+            <input
+              id="dataIscrizione"
+              type="date"
+              {...register('dataIscrizione')}
+              className="input"
+              disabled={isFormLoading}
+            />
+          </div>
           <div>
             <label htmlFor="statusId" className="label">Ruolo nell'Associazione</label>
             <select

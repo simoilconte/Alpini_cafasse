@@ -203,6 +203,7 @@ export const createMember = mutation({
       v.literal("dimesso")
     ),
     statusId: v.optional(v.id("memberStatuses")),
+    dataIscrizione: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Check permissions - only admin or direttivo can create members
@@ -234,6 +235,7 @@ export const createMember = mutation({
       socioAttivo: args.socioAttivo,
       stato: args.stato,
       statusId: args.statusId,
+      dataIscrizione: args.dataIscrizione,
       createdAt: now,
       updatedAt: now,
     });
@@ -289,6 +291,7 @@ export const updateMember = mutation({
       )
     ),
     statusId: v.optional(v.id("memberStatuses")),
+    dataIscrizione: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Check permissions - only admin or direttivo can update members
@@ -333,6 +336,7 @@ export const updateMember = mutation({
     if (args.socioAttivo !== undefined) updateData.socioAttivo = args.socioAttivo;
     if (args.stato !== undefined) updateData.stato = args.stato;
     if (args.statusId !== undefined) (updateData as any).statusId = args.statusId;
+    if (args.dataIscrizione !== undefined) (updateData as any).dataIscrizione = args.dataIscrizione;
 
     // Calculate changes for audit log
     const changes = calculateChanges(existingMember, updateData);

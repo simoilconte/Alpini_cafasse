@@ -17,6 +17,7 @@ export const memberSchema = z.object({
     const parsed = new Date(date);
     return !isNaN(parsed.getTime()) && parsed < new Date();
   }, "Data di nascita non valida"),
+  dataIscrizione: z.string().optional(),
   email: z.string().email("Email non valida").optional().or(z.literal("")),
   telefono: z.string().optional(),
   indirizzo: z.string().optional(),

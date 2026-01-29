@@ -69,6 +69,7 @@ const schema = defineSchema({
       v.literal("dimesso")
     ),
     statusId: v.optional(v.id("memberStatuses")), // Status associativo (Presidente, etc.)
+    dataIscrizione: v.optional(v.string()), // Data iscrizione all'associazione (ISO date)
     createdAt: v.number(),
     updatedAt: v.number(),
   })
