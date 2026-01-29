@@ -18,7 +18,7 @@ import { useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { EventCard } from '../components/events';
 
-type StatoFilter = 'tutti' | 'pianificato' | 'confermato' | 'chiuso';
+type StatoFilter = 'tutti' | 'confermato' | 'chiuso';
 
 /**
  * Loading skeleton for event cards
@@ -52,7 +52,6 @@ function EventCardSkeleton() {
 function EmptyState({ filter }: { filter: StatoFilter }) {
   const messages = {
     tutti: 'Nessun evento trovato',
-    pianificato: 'Nessun evento pianificato',
     confermato: 'Nessun evento confermato',
     chiuso: 'Nessun evento chiuso',
   };
@@ -126,7 +125,7 @@ export function EventiPage() {
       <div className="bg-white border-b border-slate-200 px-4 py-3">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            {(['tutti', 'pianificato', 'confermato', 'chiuso'] as const).map((stato) => (
+            {(['tutti', 'confermato', 'chiuso'] as const).map((stato) => (
               <button
                 key={stato}
                 onClick={() => setStatoFilter(stato)}
