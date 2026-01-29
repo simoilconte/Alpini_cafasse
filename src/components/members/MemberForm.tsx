@@ -104,12 +104,18 @@ export function MemberForm({
       const results = await cercaComuniAsync(value, 10);
       setComuniSuggestions(results);
       setShowSuggestions(results.length > 0);
+      
+      // Se c'è una corrispondenza esatta, seleziona automaticamente
+      const exactMatch = results.find(c => c.nome.toLowerCase() === value.toLowerCase());
+      if (exactMatch) {
+        setCodiceCatastale(exactMatch.codiceCatastale);
+      } else {
+        // Reset codice catastale se non c'è match esatto
+        setCodiceCatastale('');
+      }
     } else {
       setComuniSuggestions([]);
       setShowSuggestions(false);
-    }
-    // Reset codice catastale se l'utente sta digitando
-    if (!comuniSuggestions.find(c => c.nome === value)) {
       setCodiceCatastale('');
     }
   };
@@ -241,7 +247,12 @@ export function MemberForm({
             />
             {codiceCatastale && (
               <p className="text-xs text-green-600 mt-1">
-                Codice catastale: {codiceCatastale}
+                ✓ Codice catastale: {codiceCatastale}
+              </p>
+            )}
+            {!codiceCatastale && luogoNascita.length >= 2 && (
+              <p className="text-xs text-amber-600 mt-1">
+                ⚠️ Seleziona il comune dalla lista per calcolare il CF
               </p>
             )}
             {/* Dropdown suggerimenti */}

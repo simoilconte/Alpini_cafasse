@@ -61,6 +61,48 @@ export const getCurrentProfile = query({
 });
 
 /**
+ * Ensure user has a profile, creating one if needed.
+ * Called on first app load after login.
+ */
+export const ensureProfile = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return null;
+    }
+
+    // Check if profile already exists
+    const existingProfile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .unique();
+
+    if (existingProfile) {
+      return existingProfile;
+    }
+
+    // Find socio role
+    const socioRole = await ctx.db
+      .query("roles")
+      .withIndex("by_name", (q) => q.eq("name", "socio"))
+      .first();
+
+    // Create new profile with default role "socio"
+    const now = Date.now();
+    const profileId = await ctx.db.insert("profiles", {
+      userId,
+      role: "socio",
+      roleId: socioRole?._id,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return await ctx.db.get(profileId);
+  },
+});
+
+/**
  * Get a profile by user ID.
  * Only accessible by admin/direttivo or the user themselves.
  */

@@ -15,8 +15,9 @@
  */
 
 import { Link } from 'react-router-dom';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
+import { useEffect } from 'react';
 
 /**
  * Stat card component for dashboard widgets
@@ -195,15 +196,47 @@ function ListSkeleton() {
 
 export function DashboardPage() {
   const profile = useQuery(api.profiles.getCurrentProfile);
-  const activeCount = useQuery(api.members.getMemberCount, { socioAttivo: true });
-  const totalCount = useQuery(api.members.getMemberCount, {});
+  const ensureProfile = useMutation(api.profiles.ensureProfile);
+  
+  // Ensure profile exists on first load
+  useEffect(() => {
+    if (profile === null) {
+      ensureProfile().catch(console.error);
+    }
+  }, [profile, ensureProfile]);
+
+  const activeCount = useQuery(api.members.getMemberCount, 
+    profile ? { socioAttivo: true } : "skip"
+  );
+  const totalCount = useQuery(api.members.getMemberCount, 
+    profile ? {} : "skip"
+  );
   
   // Dashboard stats - only for admin/direttivo
-  const dashboardStats = useQuery(api.memberships.getDashboardStats, {});
-  const unpaidMemberships = useQuery(api.memberships.getUnpaidMemberships, {});
-  const expiringMemberships = useQuery(api.memberships.getExpiringMemberships, {});
-
   const isAdmin = profile?.role === 'admin' || profile?.role === 'direttivo';
+  
+  const dashboardStats = useQuery(api.memberships.getDashboardStats, 
+    isAdmin ? {} : "skip"
+  );
+  const unpaidMemberships = useQuery(api.memberships.getUnpaidMemberships, 
+    isAdmin ? {} : "skip"
+  );
+  const expiringMemberships = useQuery(api.memberships.getExpiringMemberships, 
+    isAdmin ? {} : "skip"
+  );
+
+  // Show loading while profile is being created/loaded
+  if (profile === undefined || profile === null) {
+    return (
+      <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center">
+        <div className="text-center">
+          <img src="/logo.png" alt="Maestrale" className="h-20 w-auto mx-auto mb-4 animate-pulse" />
+          <p className="text-gray-600">Caricamento profilo...</p>
+        </div>
+      </div>
+    );
+  }
+
   const statsLoading = dashboardStats === undefined;
   const unpaidLoading = unpaidMemberships === undefined;
   const expiringLoading = expiringMemberships === undefined;
