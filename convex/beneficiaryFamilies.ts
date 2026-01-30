@@ -70,6 +70,7 @@ export const upsert = mutation({
     referenteNome: v.string(),
     referenteCognome: v.string(),
     componentiNucleo: v.number(),
+    deliveryLocation: v.optional(v.string()),
     attiva: v.boolean(),
     note: v.optional(v.string()),
   },

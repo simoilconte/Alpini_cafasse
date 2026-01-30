@@ -145,6 +145,7 @@ const schema = defineSchema({
     referenteNome: v.string(),
     referenteCognome: v.string(),
     componentiNucleo: v.number(), // Totale persone nel nucleo
+    deliveryLocation: v.optional(v.string()), // Comune di consegna
     attiva: v.boolean(),
     note: v.optional(v.string()), // es. "2 bambini", "anziani"
     createdAt: v.number(),
@@ -152,7 +153,8 @@ const schema = defineSchema({
   })
     .index("by_attiva", ["attiva"])
     .index("by_cognome", ["referenteCognome"])
-    .index("by_attiva_cognome", ["attiva", "referenteCognome"]),
+    .index("by_attiva_cognome", ["attiva", "referenteCognome"])
+    .index("by_delivery_location", ["deliveryLocation"]),
 
   // Consegne borse spesa
   bagDeliveries: defineTable({

@@ -24,12 +24,13 @@ function getToday(): string {
 // Export to CSV (Excel compatible)
 function exportToExcel(data: any[], filename: string) {
   // CSV header
-  const headers = ["Data", "Famiglia", "Componenti", "Borsa Resa", "Note"];
+  const headers = ["Data", "Famiglia", "Comune", "Componenti", "Borsa Resa", "Note"];
   
   // CSV rows
   const rows = data.map((d) => [
     d.deliveryDate,
     d.family ? `${d.family.referenteCognome} ${d.family.referenteNome}` : "N/A",
+    d.family?.deliveryLocation || "",
     d.family?.componentiNucleo ?? "",
     d.emptyBagReturned ? "Sì" : "No",
     d.notes || "",
@@ -57,6 +58,7 @@ export function RegistroConsegnePage() {
   const [dateFrom, setDateFrom] = useState(getFirstDayOfMonth());
   const [dateTo, setDateTo] = useState(getToday());
   const [selectedFamilyId, setSelectedFamilyId] = useState<Id<"beneficiaryFamilies"> | "">("");
+  const [sortBy, setSortBy] = useState<"data" | "comune">("data");
 
   // Queries
   const families = useQuery(api.beneficiaryFamilies.list, {});
@@ -75,6 +77,23 @@ export function RegistroConsegnePage() {
       notReturned: deliveries.filter((d) => !d.emptyBagReturned).length,
     };
   }, [deliveries]);
+
+  // Sorted deliveries
+  const sortedDeliveries = useMemo(() => {
+    if (!deliveries) return undefined;
+    const sorted = [...deliveries];
+    if (sortBy === "comune") {
+      sorted.sort((a, b) => {
+        const locA = (a.family as any)?.deliveryLocation || "";
+        const locB = (b.family as any)?.deliveryLocation || "";
+        if (locA === locB) {
+          return a.deliveryDate.localeCompare(b.deliveryDate);
+        }
+        return locA.localeCompare(locB);
+      });
+    }
+    return sorted;
+  }, [deliveries, sortBy]);
 
   const handleExport = () => {
     if (!deliveries || deliveries.length === 0) {
@@ -132,7 +151,7 @@ export function RegistroConsegnePage() {
             Resetta
           </button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
           <div>
             <label className="block text-sm text-slate-600 mb-1">Da data</label>
             <input
@@ -166,6 +185,17 @@ export function RegistroConsegnePage() {
               ))}
             </select>
           </div>
+          <div>
+            <label className="block text-sm text-slate-600 mb-1">Ordina per</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as "data" | "comune")}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="data">Data consegna</option>
+              <option value="comune">Comune di consegna</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -194,26 +224,27 @@ export function RegistroConsegnePage() {
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-medium text-slate-600">Data</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-slate-600">Famiglia</th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-slate-600">Comune</th>
                 <th className="px-4 py-3 text-center text-sm font-medium text-slate-600">Componenti</th>
                 <th className="px-4 py-3 text-center text-sm font-medium text-slate-600">Borsa</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-slate-600">Note</th>
               </tr>
             </thead>
             <tbody className="divide-y">
-              {deliveries === undefined ? (
+              {sortedDeliveries === undefined ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
                     Caricamento...
                   </td>
                 </tr>
-              ) : deliveries.length === 0 ? (
+              ) : sortedDeliveries.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
                     Nessuna consegna trovata
                   </td>
                 </tr>
               ) : (
-                deliveries.map((d) => (
+                sortedDeliveries.map((d) => (
                   <tr key={d._id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 text-sm">
                       {new Date(d.deliveryDate + "T12:00:00").toLocaleDateString("it-IT", {
@@ -226,6 +257,9 @@ export function RegistroConsegnePage() {
                       <span className="font-medium text-slate-900">
                         {d.family ? `${d.family.referenteCognome} ${d.family.referenteNome}` : "N/A"}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-600">
+                      {(d.family as any)?.deliveryLocation || "-"}
                     </td>
                     <td className="px-4 py-3 text-center text-sm text-slate-600">
                       {d.family?.componentiNucleo ?? "-"}
@@ -253,12 +287,12 @@ export function RegistroConsegnePage() {
 
         {/* Mobile cards */}
         <div className="md:hidden divide-y">
-          {deliveries === undefined ? (
+          {sortedDeliveries === undefined ? (
             <div className="p-4 text-center text-slate-500">Caricamento...</div>
-          ) : deliveries.length === 0 ? (
+          ) : sortedDeliveries.length === 0 ? (
             <div className="p-4 text-center text-slate-500">Nessuna consegna trovata</div>
           ) : (
-            deliveries.map((d) => (
+            sortedDeliveries.map((d) => (
               <div key={d._id} className="p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div>
@@ -273,6 +307,11 @@ export function RegistroConsegnePage() {
                         year: "numeric",
                       })}
                     </p>
+                    {(d.family as any)?.deliveryLocation && (
+                      <p className="text-sm text-blue-600">
+                        📍 {(d.family as any).deliveryLocation}
+                      </p>
+                    )}
                   </div>
                   {d.emptyBagReturned ? (
                     <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">

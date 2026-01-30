@@ -34,6 +34,7 @@ export function FamiglieBeneficiariePage() {
     referenteNome: "",
     referenteCognome: "",
     componentiNucleo: 1,
+    deliveryLocation: "",
     attiva: true,
     note: "",
   });
@@ -45,6 +46,7 @@ export function FamiglieBeneficiariePage() {
       referenteNome: "",
       referenteCognome: "",
       componentiNucleo: 1,
+      deliveryLocation: "",
       attiva: true,
       note: "",
     });
@@ -57,6 +59,7 @@ export function FamiglieBeneficiariePage() {
       referenteNome: family.referenteNome,
       referenteCognome: family.referenteCognome,
       componentiNucleo: family.componentiNucleo,
+      deliveryLocation: (family as any).deliveryLocation || "",
       attiva: family.attiva,
       note: family.note || "",
     });
@@ -70,6 +73,7 @@ export function FamiglieBeneficiariePage() {
       await upsertFamily({
         id: editingFamily?._id,
         ...formData,
+        deliveryLocation: formData.deliveryLocation || undefined,
         note: formData.note || undefined,
       });
       setShowForm(false);
@@ -262,6 +266,18 @@ export function FamiglieBeneficiariePage() {
                   min={1}
                   value={formData.componentiNucleo}
                   onChange={(e) => setFormData({ ...formData, componentiNucleo: parseInt(e.target.value) || 1 })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Comune di consegna
+                </label>
+                <input
+                  type="text"
+                  value={formData.deliveryLocation}
+                  onChange={(e) => setFormData({ ...formData, deliveryLocation: e.target.value })}
+                  placeholder="es. Chioggia, Sottomarina..."
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
