@@ -47,6 +47,7 @@ export function BorseSpesaPage() {
   const isToday = selectedDate === today;
   
   const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<"cognome" | "comune">("cognome");
   const [selectedFamilyId, setSelectedFamilyId] = useState<Id<"beneficiaryFamilies"> | null>(null);
   const [showResoModal, setShowResoModal] = useState(false);
   const [isDelivering, setIsDelivering] = useState<Id<"beneficiaryFamilies"> | null>(null);
@@ -78,6 +79,23 @@ export function BorseSpesaPage() {
     }
     return map;
   }, [dateDeliveries]);
+
+  // Sorted families
+  const sortedFamilies = useMemo(() => {
+    if (!families) return undefined;
+    const sorted = [...families];
+    if (sortBy === "comune") {
+      sorted.sort((a, b) => {
+        const locA = (a as any).deliveryLocation || "";
+        const locB = (b as any).deliveryLocation || "";
+        if (locA === locB) {
+          return a.referenteCognome.localeCompare(b.referenteCognome);
+        }
+        return locA.localeCompare(locB);
+      });
+    }
+    return sorted;
+  }, [families, sortBy]);
 
   // Handle delivery
   const handleDeliver = async (familyId: Id<"beneficiaryFamilies">) => {
@@ -208,15 +226,23 @@ export function BorseSpesaPage() {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="mb-4">
+      {/* Search and Sort */}
+      <div className="flex gap-2 mb-4">
         <input
           type="text"
           placeholder="Cerca famiglia..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as "cognome" | "comune")}
+          className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="cognome">Cognome</option>
+          <option value="comune">Comune</option>
+        </select>
       </div>
 
       {/* Stats */}
@@ -233,17 +259,18 @@ export function BorseSpesaPage() {
 
       {/* Families list */}
       <div className="space-y-3">
-        {families === undefined ? (
+        {sortedFamilies === undefined ? (
           <div className="text-center py-8 text-slate-500">Caricamento...</div>
-        ) : families.length === 0 ? (
+        ) : sortedFamilies.length === 0 ? (
           <div className="text-center py-8 text-slate-500">
             {search ? "Nessuna famiglia trovata" : "Nessuna famiglia attiva"}
           </div>
         ) : (
-          families.map((family) => {
+          sortedFamilies.map((family) => {
             const delivery = deliveryByFamily.get(family._id);
             const hasDelivered = !!delivery;
             const warningCount = warningCounts?.[family._id] ?? 0;
+            const deliveryLocation = (family as any).deliveryLocation;
 
             return (
               <div
@@ -272,6 +299,9 @@ export function BorseSpesaPage() {
                         </span>
                       )}
                     </div>
+                    {deliveryLocation && (
+                      <p className="text-sm text-blue-600 mt-1">📍 {deliveryLocation}</p>
+                    )}
                     {family.note && (
                       <p className="text-sm text-slate-500 mt-1">{family.note}</p>
                     )}
