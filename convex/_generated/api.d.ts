@@ -22,6 +22,8 @@ import type * as lib_auth from "../lib/auth.js";
 import type * as memberStatuses from "../memberStatuses.js";
 import type * as members from "../members.js";
 import type * as memberships from "../memberships.js";
+import type * as paymentStatuses from "../paymentStatuses.js";
+import type * as payments from "../payments.js";
 import type * as profiles from "../profiles.js";
 import type * as roles from "../roles.js";
 import type * as setupAdmin from "../setupAdmin.js";
@@ -49,6 +51,8 @@ declare const fullApi: ApiFromModules<{
   memberStatuses: typeof memberStatuses;
   members: typeof members;
   memberships: typeof memberships;
+  paymentStatuses: typeof paymentStatuses;
+  payments: typeof payments;
   profiles: typeof profiles;
   roles: typeof roles;
   setupAdmin: typeof setupAdmin;

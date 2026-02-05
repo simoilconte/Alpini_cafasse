@@ -7,7 +7,7 @@
 
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
-import { requireAuth } from "./lib/auth";
+import { requireAuth, requireAdminOrDirettivo } from "./lib/auth";
 
 /**
  * List equipment with filters
@@ -96,17 +96,7 @@ export const upsert = mutation({
     note: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Non autenticato");
-
-    const profile = await ctx.db
-      .query("profiles")
-      .withIndex("by_user", (q) => q.eq("userId", identity.subject as any))
-      .first();
-
-    if (!profile || !["admin", "direttivo"].includes(profile.role)) {
-      throw new Error("Non hai i permessi per modificare le attrezzature");
-    }
+    await requireAdminOrDirettivo(ctx);
 
     const now = Date.now();
     const { id, ...data } = args;
@@ -143,18 +133,7 @@ export const upsert = mutation({
 export const remove = mutation({
   args: { id: v.id("equipment") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Non autenticato");
-
-    const profile = await ctx.db
-      .query("profiles")
-      .withIndex("by_user", (q) => q.eq("userId", identity.subject as any))
-      .first();
-
-    if (!profile || !["admin", "direttivo"].includes(profile.role)) {
-      throw new Error("Non hai i permessi per eliminare le attrezzature");
-    }
-
+    await requireAdminOrDirettivo(ctx);
     await ctx.db.delete(args.id);
   },
 });

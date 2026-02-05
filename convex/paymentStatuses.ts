@@ -1,7 +1,7 @@
 /**
- * Equipment Statuses Management
+ * Payment Statuses Management
  * 
- * CRUD operations for equipment statuses.
+ * CRUD operations for payment statuses.
  * Access: admin, direttivo
  */
 
@@ -22,11 +22,11 @@ export const list = query({
     let statuses;
     if (args.activeOnly) {
       statuses = await ctx.db
-        .query("equipmentStatuses")
+        .query("paymentStatuses")
         .withIndex("by_attivo", (q) => q.eq("attivo", true))
         .collect();
     } else {
-      statuses = await ctx.db.query("equipmentStatuses").collect();
+      statuses = await ctx.db.query("paymentStatuses").collect();
     }
 
     return statuses.sort((a, b) => a.nome.localeCompare(b.nome));
@@ -37,7 +37,7 @@ export const list = query({
  * Get single status
  */
 export const get = query({
-  args: { id: v.id("equipmentStatuses") },
+  args: { id: v.id("paymentStatuses") },
   handler: async (ctx, args) => {
     await requireAuth(ctx);
     return await ctx.db.get(args.id);
@@ -50,7 +50,7 @@ export const get = query({
  */
 export const upsert = mutation({
   args: {
-    id: v.optional(v.id("equipmentStatuses")),
+    id: v.optional(v.id("paymentStatuses")),
     nome: v.string(),
     descrizione: v.optional(v.string()),
     attivo: v.boolean(),
@@ -63,7 +63,7 @@ export const upsert = mutation({
 
     // Check for duplicate name
     const existing = await ctx.db
-      .query("equipmentStatuses")
+      .query("paymentStatuses")
       .withIndex("by_nome", (q) => q.eq("nome", data.nome))
       .first();
 
@@ -75,7 +75,7 @@ export const upsert = mutation({
       await ctx.db.patch(id, { ...data, updatedAt: now });
       return id;
     } else {
-      return await ctx.db.insert("equipmentStatuses", {
+      return await ctx.db.insert("paymentStatuses", {
         ...data,
         createdAt: now,
         updatedAt: now,
@@ -86,22 +86,22 @@ export const upsert = mutation({
 
 /**
  * Delete status
- * Only if no equipment is associated
+ * Only if no payments are associated
  */
 export const remove = mutation({
-  args: { id: v.id("equipmentStatuses") },
+  args: { id: v.id("paymentStatuses") },
   handler: async (ctx, args) => {
     await requireAdminOrDirettivo(ctx);
 
-    // Check for associated equipment
-    const equipment = await ctx.db
-      .query("equipment")
-      .withIndex("by_stato", (q) => q.eq("statoId", args.id))
+    // Check for associated payments
+    const payment = await ctx.db
+      .query("payments")
+      .withIndex("by_status", (q) => q.eq("statusId", args.id))
       .first();
 
-    if (equipment) {
+    if (payment) {
       throw new Error(
-        "Impossibile eliminare: ci sono attrezzature associate a questo stato. Disattivalo invece."
+        "Impossibile eliminare: ci sono pagamenti associati a questo stato. Disattivalo invece."
       );
     }
 

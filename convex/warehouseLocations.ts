@@ -7,7 +7,7 @@
 
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
-import { requireAuth } from "./lib/auth";
+import { requireAuth, requireAdminOrDirettivo } from "./lib/auth";
 
 /**
  * List all locations (active or all)
@@ -56,17 +56,7 @@ export const upsert = mutation({
     attiva: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Non autenticato");
-
-    const profile = await ctx.db
-      .query("profiles")
-      .withIndex("by_user", (q) => q.eq("userId", identity.subject as any))
-      .first();
-
-    if (!profile || !["admin", "direttivo"].includes(profile.role)) {
-      throw new Error("Non hai i permessi per modificare le ubicazioni");
-    }
+    await requireAdminOrDirettivo(ctx);
 
     const now = Date.now();
     const { id, ...data } = args;
@@ -101,17 +91,7 @@ export const upsert = mutation({
 export const remove = mutation({
   args: { id: v.id("warehouseLocations") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Non autenticato");
-
-    const profile = await ctx.db
-      .query("profiles")
-      .withIndex("by_user", (q) => q.eq("userId", identity.subject as any))
-      .first();
-
-    if (!profile || !["admin", "direttivo"].includes(profile.role)) {
-      throw new Error("Non hai i permessi per eliminare le ubicazioni");
-    }
+    await requireAdminOrDirettivo(ctx);
 
     // Check for associated equipment
     const equipment = await ctx.db

@@ -220,6 +220,40 @@ const schema = defineSchema({
     .index("by_ubicazione", ["ubicazioneId"])
     .index("by_stato", ["statoId"]),
 
+  // Stati pagamento (configurabili da UI)
+  paymentStatuses: defineTable({
+    nome: v.string(),
+    descrizione: v.optional(v.string()),
+    attivo: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_nome", ["nome"])
+    .index("by_attivo", ["attivo"]),
+
+  // Scadenziario pagamenti (solo USCITE)
+  payments: defineTable({
+    title: v.string(),
+    description: v.optional(v.string()),
+    amountPlanned: v.optional(v.number()),
+    dueDate: v.string(), // ISO date YYYY-MM-DD
+    statusId: v.id("paymentStatuses"),
+    isRecurring: v.boolean(),
+    recurrenceType: v.optional(v.union(v.literal("EVERY_N_MONTHS"), v.literal("CUSTOM_DATES"))),
+    everyNMonths: v.optional(v.number()),
+    customDates: v.optional(v.array(v.string())), // Array di date ISO
+    parentId: v.optional(v.id("payments")), // Per storico ricorrenze
+    paidAt: v.optional(v.string()), // ISO date quando pagato
+    amountPaid: v.optional(v.number()),
+    paidNote: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_dueDate", ["dueDate"])
+    .index("by_status", ["statusId"])
+    .index("by_parent", ["parentId"])
+    .index("by_paidAt", ["paidAt"]),
+
   // Audit log per tracciabilità
   auditLogs: defineTable({
     entityType: v.union(

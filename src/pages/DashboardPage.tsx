@@ -224,6 +224,11 @@ export function DashboardPage() {
   const expiringMemberships = useQuery(api.memberships.getExpiringMemberships, 
     isAdmin ? {} : "skip"
   );
+  
+  // Payment stats for scadenziario banner
+  const paymentStats = useQuery(api.payments.getDashboardStats, 
+    isAdmin ? {} : "skip"
+  );
 
   // Show loading while profile is being created/loaded
   if (profile === undefined || profile === null) {
@@ -367,6 +372,49 @@ export function DashboardPage() {
             />
           </div>
         </div>
+
+        {/* Scadenziario Banner - only for admin/direttivo */}
+        {isAdmin && paymentStats && (paymentStats.dueThisMonthCount > 0 || paymentStats.overdueCount > 0) && (
+          <div className="mb-8">
+            <Link
+              to="/scadenziario"
+              className="block bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4 hover:shadow-md transition-all"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-amber-900">Scadenze Pagamenti</h3>
+                    <div className="flex items-center gap-3 text-sm">
+                      {paymentStats.overdueCount > 0 && (
+                        <span className="text-red-600 font-medium">
+                          {paymentStats.overdueCount} scadut{paymentStats.overdueCount === 1 ? 'o' : 'i'}
+                        </span>
+                      )}
+                      {paymentStats.dueIn7DaysCount > 0 && (
+                        <span className="text-amber-700">
+                          {paymentStats.dueIn7DaysCount} entro 7 giorni
+                        </span>
+                      )}
+                      {paymentStats.dueThisMonthCount > 0 && (
+                        <span className="text-amber-600">
+                          {paymentStats.dueThisMonthCount} questo mese
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </Link>
+          </div>
+        )}
 
         {/* Alerts section - only for admin/direttivo */}
         {isAdmin && (

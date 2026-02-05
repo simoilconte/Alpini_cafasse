@@ -10,3 +10,5 @@ export { FamiglieBeneficiariePage } from './FamiglieBeneficiariePage';
 export { FamigliaDetailPage } from './FamigliaDetailPage';
 export { BorseSpesaSettingsPage } from './BorseSpesaSettingsPage';
 export { RegistroConsegnePage } from './RegistroConsegnePage';
+export { ScadenziarioPage } from './ScadenziarioPage';
+export { StatiPagamentoPage } from './StatiPagamentoPage';

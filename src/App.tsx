@@ -21,6 +21,8 @@ import { RegistroConsegnePage } from './pages/RegistroConsegnePage';
 import { MagazzinoPage } from './pages/MagazzinoPage';
 import { UbicazioniPage } from './pages/UbicazioniPage';
 import { StatiAttrezzaturaPage } from './pages/StatiAttrezzaturaPage';
+import { ScadenziarioPage } from './pages/ScadenziarioPage';
+import { StatiPagamentoPage } from './pages/StatiPagamentoPage';
 import { MainLayout } from './components/layout';
 
 function LoadingScreen() {
@@ -71,6 +73,8 @@ function App() {
             <Route path="/magazzino" element={<MagazzinoPage />} />
             <Route path="/magazzino/ubicazioni" element={<UbicazioniPage />} />
             <Route path="/magazzino/stati" element={<StatiAttrezzaturaPage />} />
+            <Route path="/scadenziario" element={<ScadenziarioPage />} />
+            <Route path="/scadenziario/stati" element={<StatiPagamentoPage />} />
             <Route path="/tessere" element={<div className="p-6">Pagina Tessere - Coming Soon</div>} />
             <Route path="/audit" element={<div className="p-6">Audit Log - Coming Soon</div>} />
           </Route>
