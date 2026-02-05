@@ -679,7 +679,7 @@ export const getMyMember = query({
  * For dashboard statistics.
  * 
  * Access control:
- * - Only admin/direttivo can get member counts
+ * - Any authenticated user can get basic member counts
  * 
  * @param args.socioAttivo - Optional filter by active status
  * @param args.stato - Optional filter by member status
@@ -697,15 +697,8 @@ export const getMemberCount = query({
     ),
   },
   handler: async (ctx, args): Promise<number> => {
-    // Check permissions - only admin/direttivo can get counts
-    const profile = await getOptionalProfile(ctx);
-    if (!profile) {
-      throw new Error("Non autenticato");
-    }
-    
-    if (!isAdminOrDirettivo(profile)) {
-      throw new Error("Accesso negato: solo admin e direttivo possono visualizzare le statistiche");
-    }
+    // Any authenticated user can see member counts
+    await requireAuth(ctx);
 
     // Collect members - use index if socioAttivo filter is provided
     let members: Doc<"members">[];
