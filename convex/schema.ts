@@ -183,6 +183,43 @@ const schema = defineSchema({
   })
     .index("by_key", ["key"]),
 
+  // Ubicazioni magazzino
+  warehouseLocations: defineTable({
+    nome: v.string(),
+    descrizione: v.optional(v.string()),
+    attiva: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_nome", ["nome"])
+    .index("by_attiva", ["attiva"]),
+
+  // Stati attrezzatura
+  equipmentStatuses: defineTable({
+    nome: v.string(),
+    descrizione: v.optional(v.string()),
+    attivo: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_nome", ["nome"])
+    .index("by_attivo", ["attivo"]),
+
+  // Attrezzature
+  equipment: defineTable({
+    nome: v.string(),
+    codice: v.optional(v.string()), // Seriale/inventario
+    ubicazioneId: v.id("warehouseLocations"),
+    statoId: v.id("equipmentStatuses"),
+    note: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_nome", ["nome"])
+    .index("by_codice", ["codice"])
+    .index("by_ubicazione", ["ubicazioneId"])
+    .index("by_stato", ["statoId"]),
+
   // Audit log per tracciabilità
   auditLogs: defineTable({
     entityType: v.union(

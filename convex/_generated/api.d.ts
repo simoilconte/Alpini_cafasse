@@ -12,6 +12,8 @@ import type * as appSettings from "../appSettings.js";
 import type * as auth from "../auth.js";
 import type * as bagDeliveries from "../bagDeliveries.js";
 import type * as beneficiaryFamilies from "../beneficiaryFamilies.js";
+import type * as equipment from "../equipment.js";
+import type * as equipmentStatuses from "../equipmentStatuses.js";
 import type * as eventParticipants from "../eventParticipants.js";
 import type * as events from "../events.js";
 import type * as http from "../http.js";
@@ -24,6 +26,7 @@ import type * as profiles from "../profiles.js";
 import type * as roles from "../roles.js";
 import type * as setupAdmin from "../setupAdmin.js";
 import type * as users from "../users.js";
+import type * as warehouseLocations from "../warehouseLocations.js";
 
 import type {
   ApiFromModules,
@@ -36,6 +39,8 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   bagDeliveries: typeof bagDeliveries;
   beneficiaryFamilies: typeof beneficiaryFamilies;
+  equipment: typeof equipment;
+  equipmentStatuses: typeof equipmentStatuses;
   eventParticipants: typeof eventParticipants;
   events: typeof events;
   http: typeof http;
@@ -48,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   roles: typeof roles;
   setupAdmin: typeof setupAdmin;
   users: typeof users;
+  warehouseLocations: typeof warehouseLocations;
 }>;
 
 /**

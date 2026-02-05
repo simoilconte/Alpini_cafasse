@@ -18,6 +18,9 @@ import { FamiglieBeneficiariePage } from './pages/FamiglieBeneficiariePage';
 import { FamigliaDetailPage } from './pages/FamigliaDetailPage';
 import { BorseSpesaSettingsPage } from './pages/BorseSpesaSettingsPage';
 import { RegistroConsegnePage } from './pages/RegistroConsegnePage';
+import { MagazzinoPage } from './pages/MagazzinoPage';
+import { UbicazioniPage } from './pages/UbicazioniPage';
+import { StatiAttrezzaturaPage } from './pages/StatiAttrezzaturaPage';
 import { MainLayout } from './components/layout';
 
 function LoadingScreen() {
@@ -65,6 +68,9 @@ function App() {
             <Route path="/borse-spesa/famiglie" element={<FamiglieBeneficiariePage />} />
             <Route path="/borse-spesa/famiglie/:id" element={<FamigliaDetailPage />} />
             <Route path="/borse-spesa/impostazioni" element={<BorseSpesaSettingsPage />} />
+            <Route path="/magazzino" element={<MagazzinoPage />} />
+            <Route path="/magazzino/ubicazioni" element={<UbicazioniPage />} />
+            <Route path="/magazzino/stati" element={<StatiAttrezzaturaPage />} />
             <Route path="/tessere" element={<div className="p-6">Pagina Tessere - Coming Soon</div>} />
             <Route path="/audit" element={<div className="p-6">Audit Log - Coming Soon</div>} />
           </Route>
