@@ -288,7 +288,6 @@ export const getDashboardStats = query({
 
     const now = new Date();
     const currentMonth = now.toISOString().slice(0, 7); // YYYY-MM
-    const today = now.toISOString().slice(0, 10); // YYYY-MM-DD
 
     // Get all movements
     const movements = await ctx.db.query("movements").collect();
