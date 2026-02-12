@@ -288,7 +288,7 @@ export const generateUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Unauthorized");
+    if (!userId) throw new Error("Non autenticato");
 
     // Check permissions
     const profile = await ctx.db
@@ -296,8 +296,12 @@ export const generateUploadUrl = mutation({
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .first();
 
-    if (!profile || !["admin", "direttivo"].includes(profile.role)) {
-      throw new Error("Unauthorized");
+    if (!profile) {
+      throw new Error("Profilo non trovato per l'utente corrente");
+    }
+
+    if (!["admin", "direttivo"].includes(profile.role)) {
+      throw new Error(`Permessi insufficienti: ruolo "${profile.role}" non autorizzato per upload allegati`);
     }
 
     return await ctx.storage.generateUploadUrl();
