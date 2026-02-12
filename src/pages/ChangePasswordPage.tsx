@@ -44,7 +44,7 @@ export function ChangePasswordPage() {
     }
   }, [checkForcePasswordChange, navigate]);
 
-  const handleSubmit = async (data: ChangePasswordFormData) => {
+  const handleSubmit = async (_data: ChangePasswordFormData) => {
     setIsLoading(true);
     setError(null);
     setSuccess(null);

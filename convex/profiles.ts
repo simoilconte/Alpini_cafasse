@@ -246,8 +246,8 @@ export const requestPasswordReset = mutation({
     return {
       success: true,
       message: "Se l'email esiste, riceverai le istruzioni",
-      // Only include token in development
-      ...(process.env.NODE_ENV !== "production" && { token }),
+      // Token included for testing purposes
+      token,
     };
   },
 });
