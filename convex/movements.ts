@@ -375,14 +375,14 @@ function calculateNextDueDate(
   everyNMonths?: number,
   customDates?: string[]
 ): string | null {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
 
   if (recurrenceType === "EVERY_N_MONTHS" && everyNMonths) {
     const current = new Date(currentDueDate);
     current.setMonth(current.getMonth() + everyNMonths);
 
-    if (current > today) {
+    if (current > now) {
       return current.toISOString().slice(0, 10);
     }
   }
@@ -390,7 +390,7 @@ function calculateNextDueDate(
   if (recurrenceType === "CUSTOM_DATES" && customDates) {
     for (const date of customDates) {
       const due = new Date(date);
-      if (due > today) {
+      if (due > now) {
         return date;
       }
     }

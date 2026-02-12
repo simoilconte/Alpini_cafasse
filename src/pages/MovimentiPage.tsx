@@ -60,7 +60,6 @@ const MovimentiPage: React.FC = () => {
   });
 
   const movementStatuses = useQuery(api.movementStatuses.list);
-  const dashboardStats = useQuery(api.movements.getDashboardStats);
 
   // Mutations
   const markAsExecuted = useMutation(api.movements.markAsExecuted);
