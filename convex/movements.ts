@@ -125,7 +125,15 @@ export const upsert = mutation({
     everyNMonths: v.optional(v.number()),
     customDates: v.optional(v.array(v.string())),
     parentId: v.optional(v.id("movements")),
-    attachments: v.optional(v.array(v.string())),
+    attachments: v.optional(
+      v.array(
+        v.object({
+          name: v.string(),
+          type: v.string(),
+          data: v.string(),
+        })
+      )
+    ),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);

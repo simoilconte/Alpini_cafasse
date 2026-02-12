@@ -66,7 +66,6 @@ const MovimentiPage: React.FC = () => {
   const markAsExecuted = useMutation(api.movements.markAsExecuted);
   const deleteMovement = useMutation(api.movements.remove);
   const createMovement = useMutation(api.movements.upsert);
-  const generateUploadUrl = useMutation(api.movements.generateUploadUrl);
 
   // State for modals
   const [selectedMovement, setSelectedMovement] = useState<Movement | null>(null);
@@ -451,7 +450,7 @@ const MovimentiPage: React.FC = () => {
                       <div className="mt-1">
                         <span className="text-xs text-blue-600">
                           {movement.attachments.length} allegato
-                          {movement.attachments.length > 1 ? "i" : ""}
+                          {movement.attachments.length > 1 ? "i" : ""} 📎
                         </span>
                       </div>
                     )}
@@ -775,24 +774,25 @@ const MovimentiPage: React.FC = () => {
                   try {
                     setUploading(true);
 
-                    // Upload files to Convex storage
-                    const uploadedStorageIds: string[] = [];
-                    for (const file of selectedFiles) {
-                      // Get upload URL from Convex
-                      const uploadUrl = await generateUploadUrl();
+                    // Convert files to base64
+                    const filePromises = selectedFiles.map((file) => {
+                      return new Promise<{ name: string; type: string; data: string }>(
+                        (resolve, reject) => {
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            resolve({
+                              name: file.name,
+                              type: file.type,
+                              data: reader.result as string,
+                            });
+                          };
+                          reader.onerror = reject;
+                          reader.readAsDataURL(file);
+                        }
+                      );
+                    });
 
-                      // Upload file to the returned URL
-                      const response = await fetch(uploadUrl, {
-                        method: "POST",
-                        headers: { "Content-Type": file.type },
-                        body: file,
-                      });
-
-                      if (response.ok) {
-                        const result = await response.json();
-                        uploadedStorageIds.push(result.storageId);
-                      }
-                    }
+                    const attachments = await Promise.all(filePromises);
 
                     await createMovement({
                       title: createForm.title,
@@ -810,7 +810,7 @@ const MovimentiPage: React.FC = () => {
                         : undefined,
                       customDates:
                         createForm.customDates.length > 0 ? createForm.customDates : undefined,
-                      attachments: uploadedStorageIds.length > 0 ? uploadedStorageIds : undefined,
+                      attachments: attachments.length > 0 ? attachments : undefined,
                     });
                     setShowCreateModal(false);
                     setCreateForm({
