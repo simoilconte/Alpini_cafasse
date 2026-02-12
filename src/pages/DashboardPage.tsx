@@ -14,7 +14,7 @@
  * - Req 12.3: Responsive design with mobile navigation
  */
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useEffect } from "react";
@@ -218,6 +218,7 @@ function ListSkeleton() {
 }
 
 export function DashboardPage() {
+  const navigate = useNavigate();
   const profile = useQuery(api.profiles.getCurrentProfile);
   const ensureProfile = useMutation(api.profiles.ensureProfile);
 
@@ -227,6 +228,13 @@ export function DashboardPage() {
       ensureProfile().catch(console.error);
     }
   }, [profile, ensureProfile]);
+
+  // Check if password change is required
+  useEffect(() => {
+    if (profile?.forcePasswordChange) {
+      navigate("/change-password");
+    }
+  }, [profile, navigate]);
 
   const activeCount = useQuery(
     api.members.getMemberCount,

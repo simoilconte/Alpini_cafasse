@@ -1,6 +1,9 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { LoginPage } from "./pages/LoginPage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
+import { ChangePasswordPage } from "./pages/ChangePasswordPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { SociPage } from "./pages/SociPage";
 import { SocioNewPage } from "./pages/SocioNewPage";
@@ -48,12 +51,17 @@ function App() {
       <Unauthenticated>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Unauthenticated>
 
       <Authenticated>
         <Routes>
+          {/* Change Password Page - outside MainLayout */}
+          <Route path="/change-password" element={<ChangePasswordPage />} />
+
           <Route element={<MainLayout />}>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/soci" element={<SociPage />} />

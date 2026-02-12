@@ -39,13 +39,18 @@ const schema = defineSchema({
     roleId: v.optional(v.id("roles")), // Riferimento alla tabella roles
     role: v.string(), // Nome ruolo (per retrocompatibilità)
     memberId: v.optional(v.id("members")), // Solo per ruolo "socio"
+    // Password management
+    forcePasswordChange: v.optional(v.boolean()), // Forza cambio password al prossimo login
+    passwordResetToken: v.optional(v.string()), // Token per reset password
+    passwordResetExpiresAt: v.optional(v.number()), // Scadenza token reset
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_user", ["userId"])
     .index("by_member", ["memberId"])
     .index("by_role", ["role"])
-    .index("by_role_id", ["roleId"]),
+    .index("by_role_id", ["roleId"])
+    .index("by_reset_token", ["passwordResetToken"]),
 
   // Anagrafica soci
   members: defineTable({

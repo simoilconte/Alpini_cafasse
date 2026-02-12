@@ -4,7 +4,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { loginSchema, registerSchema, type LoginFormData, type RegisterFormData } from "../lib/validations";
+import {
+  loginSchema,
+  registerSchema,
+  type LoginFormData,
+  type RegisterFormData,
+} from "../lib/validations";
 
 type AuthMode = "login" | "register";
 
@@ -38,7 +43,7 @@ export function LoginPage() {
     console.log("=== handleLogin chiamato ===");
     console.log("Email:", data.email);
     console.log("Password length:", data.password.length);
-    
+
     setIsLoading(true);
     setError(null);
 
@@ -56,16 +61,20 @@ export function LoginPage() {
     } catch (err) {
       console.error("Login error:", err);
       const errorMessage = err instanceof Error ? err.message : String(err);
-      
+
       // Gestione errori specifici di Convex Auth
       if (errorMessage.includes("InvalidSecret")) {
         setError("⚠️ PASSWORD ERRATA - La password inserita non è corretta. Riprova.");
       } else if (errorMessage.includes("InvalidAccountId")) {
-        setError("⚠️ ACCOUNT NON TROVATO - Nessun account con questa email. Devi prima registrarti.");
+        setError(
+          "⚠️ ACCOUNT NON TROVATO - Nessun account con questa email. Devi prima registrarti."
+        );
       } else if (errorMessage.includes("Invalid") || errorMessage.includes("invalid")) {
         setError("⚠️ CREDENZIALI NON VALIDE - Email o password non corretti.");
       } else if (errorMessage.includes("not found") || errorMessage.includes("NotFound")) {
-        setError("⚠️ ACCOUNT NON TROVATO - Nessun account trovato con questa email. Registrati prima.");
+        setError(
+          "⚠️ ACCOUNT NON TROVATO - Nessun account trovato con questa email. Registrati prima."
+        );
       } else if (errorMessage.includes("network") || errorMessage.includes("fetch")) {
         setError("⚠️ ERRORE DI RETE - Verifica la tua connessione internet.");
       } else {
@@ -87,25 +96,27 @@ export function LoginPage() {
       formData.append("flow", "signUp");
 
       await signIn("password", formData);
-      
+
       // Create user profile after successful registration
       // Piccolo delay per assicurarsi che l'auth sia completata
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       try {
         await createProfile();
       } catch (profileErr) {
         // Il profilo potrebbe già esistere o essere creato automaticamente
         console.log("Profile creation skipped:", profileErr);
       }
-      
+
       // On success, the Authenticated component in App.tsx will handle the redirect
     } catch (err) {
       console.error("Registration error:", err);
       const errorMessage = err instanceof Error ? err.message : String(err);
-      
+
       if (errorMessage.includes("already exists")) {
-        setError("⚠️ ACCOUNT ESISTENTE - Un account con questa email esiste già. Clicca 'Accedi' in basso.");
+        setError(
+          "⚠️ ACCOUNT ESISTENTE - Un account con questa email esiste già. Clicca 'Accedi' in basso."
+        );
       } else if (errorMessage.includes("password") || errorMessage.includes("Password")) {
         setError("⚠️ PASSWORD DEBOLE - La password deve avere almeno 8 caratteri.");
       } else if (errorMessage.includes("email") || errorMessage.includes("Email")) {
@@ -132,14 +143,8 @@ export function LoginPage() {
       <div className="card max-w-md w-full">
         {/* Header with Logo */}
         <div className="text-center mb-6">
-          <img 
-            src="/logo.png" 
-            alt="Maestrale ODV" 
-            className="mx-auto mb-4 h-24 w-auto"
-          />
-          <h1 className="text-2xl font-bold mb-2">
-            MAESTRALE ODV
-          </h1>
+          <img src="/logo.png" alt="Maestrale ODV" className="mx-auto mb-4 h-24 w-auto" />
+          <h1 className="text-2xl font-bold mb-2">MAESTRALE ODV</h1>
           <p className="text-gray-600">
             {mode === "login" ? "Accedi al tuo account" : "Crea un nuovo account"}
           </p>
@@ -154,11 +159,14 @@ export function LoginPage() {
 
         {/* Login Form */}
         {mode === "login" && (
-          <form onSubmit={loginForm.handleSubmit(handleLogin, (errors) => {
-            console.log("Form validation errors:", errors);
-            if (errors.email) setError(`⚠️ EMAIL: ${errors.email.message}`);
-            else if (errors.password) setError(`⚠️ PASSWORD: ${errors.password.message}`);
-          })} className="space-y-4">
+          <form
+            onSubmit={loginForm.handleSubmit(handleLogin, (errors) => {
+              console.log("Form validation errors:", errors);
+              if (errors.email) setError(`⚠️ EMAIL: ${errors.email.message}`);
+              else if (errors.password) setError(`⚠️ PASSWORD: ${errors.password.message}`);
+            })}
+            className="space-y-4"
+          >
             <div>
               <label htmlFor="login-email" className="label">
                 Email
@@ -191,13 +199,14 @@ export function LoginPage() {
               {loginForm.formState.errors.password && (
                 <p className="error-text">{loginForm.formState.errors.password.message}</p>
               )}
+              <div className="mt-2 text-right">
+                <a href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
+                  Password dimenticata?
+                </a>
+              </div>
             </div>
 
-            <button
-              type="submit"
-              className="btn-primary w-full"
-              disabled={isLoading}
-            >
+            <button type="submit" className="btn-primary w-full" disabled={isLoading}>
               {isLoading ? (
                 <span className="flex items-center justify-center">
                   <svg
@@ -279,15 +288,13 @@ export function LoginPage() {
                 {...registerForm.register("confirmPassword")}
               />
               {registerForm.formState.errors.confirmPassword && (
-                <p className="error-text">{registerForm.formState.errors.confirmPassword.message}</p>
+                <p className="error-text">
+                  {registerForm.formState.errors.confirmPassword.message}
+                </p>
               )}
             </div>
 
-            <button
-              type="submit"
-              className="btn-primary w-full"
-              disabled={isLoading}
-            >
+            <button type="submit" className="btn-primary w-full" disabled={isLoading}>
               {isLoading ? (
                 <span className="flex items-center justify-center">
                   <svg
