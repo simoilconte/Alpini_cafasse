@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
@@ -320,6 +321,12 @@ const MovimentiPage: React.FC = () => {
           <div className="text-sm text-gray-600">{movements?.length || 0} movimenti trovati</div>
 
           <div className="flex gap-2">
+            <Link
+              to="/movimenti/stati"
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 flex items-center gap-2"
+            >
+              ⚙️ Stati
+            </Link>
             <button
               onClick={() => setShowCreateModal(true)}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"

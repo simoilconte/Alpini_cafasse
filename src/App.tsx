@@ -24,6 +24,7 @@ import { StatiAttrezzaturaPage } from "./pages/StatiAttrezzaturaPage";
 import { ScadenziarioPage } from "./pages/ScadenziarioPage";
 import { StatiPagamentoPage } from "./pages/StatiPagamentoPage";
 import MovimentiPage from "./pages/MovimentiPage";
+import { StatiMovimentiPage } from "./pages/StatiMovimentiPage";
 import { MainLayout } from "./components/layout";
 
 function LoadingScreen() {
@@ -77,6 +78,7 @@ function App() {
             <Route path="/scadenziario" element={<ScadenziarioPage />} />
             <Route path="/scadenziario/stati" element={<StatiPagamentoPage />} />
             <Route path="/movimenti" element={<MovimentiPage />} />
+            <Route path="/movimenti/stati" element={<StatiMovimentiPage />} />
             <Route
               path="/tessere"
               element={<div className="p-6">Pagina Tessere - Coming Soon</div>}
