@@ -64,14 +64,28 @@ const MovimentiPage: React.FC = () => {
   // Mutations
   const markAsExecuted = useMutation(api.movements.markAsExecuted);
   const deleteMovement = useMutation(api.movements.remove);
+  const createMovement = useMutation(api.movements.upsert);
 
   // State for modals
   const [selectedMovement, setSelectedMovement] = useState<Movement | null>(null);
   const [showExecutedModal, setShowExecutedModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [executedForm, setExecutedForm] = useState({
     executedAt: "",
     amountActual: "",
     executedNote: "",
+  });
+  const [createForm, setCreateForm] = useState({
+    title: "",
+    description: "",
+    type: "OUT" as "IN" | "OUT",
+    amountPlanned: "",
+    dueDate: format(new Date(), "yyyy-MM-dd"),
+    statusId: "",
+    isRecurring: false,
+    recurrenceType: undefined as "EVERY_N_MONTHS" | "CUSTOM_DATES" | undefined,
+    everyNMonths: "",
+    customDates: [] as string[],
   });
 
   // Calculate filtered stats
@@ -305,13 +319,21 @@ const MovimentiPage: React.FC = () => {
         <div className="flex justify-between items-center">
           <div className="text-sm text-gray-600">{movements?.length || 0} movimenti trovati</div>
 
-          <button
-            onClick={exportToExcel}
-            disabled={!movements || movements.length === 0}
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            📊 Esporta Excel
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+            >
+              ➕ Aggiungi Movimento
+            </button>
+            <button
+              onClick={exportToExcel}
+              disabled={!movements || movements.length === 0}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              📊 Esporta Excel
+            </button>
+          </div>
         </div>
       </div>
 
@@ -499,6 +521,210 @@ const MovimentiPage: React.FC = () => {
                 className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
               >
                 Conferma
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Movement Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold mb-4">Nuovo Movimento</h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Titolo *</label>
+                <input
+                  type="text"
+                  value={createForm.title}
+                  onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Es. Pagamento affitto, Incasso quota..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
+                <select
+                  value={createForm.type}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, type: e.target.value as "IN" | "OUT" })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="OUT">Uscita (Pagamento)</option>
+                  <option value="IN">Entrata (Incasso)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Importo previsto
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={createForm.amountPlanned}
+                  onChange={(e) => setCreateForm({ ...createForm, amountPlanned: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Data scadenza *
+                </label>
+                <input
+                  type="date"
+                  value={createForm.dueDate}
+                  onChange={(e) => setCreateForm({ ...createForm, dueDate: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Stato *</label>
+                <select
+                  value={createForm.statusId}
+                  onChange={(e) => setCreateForm({ ...createForm, statusId: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Seleziona stato...</option>
+                  {movementStatuses?.map((status) => (
+                    <option key={status._id} value={status._id}>
+                      {status.nome}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione</label>
+                <textarea
+                  value={createForm.description}
+                  onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={createForm.isRecurring}
+                    onChange={(e) =>
+                      setCreateForm({ ...createForm, isRecurring: e.target.checked })
+                    }
+                    className="rounded"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Movimento ricorrente</span>
+                </label>
+              </div>
+
+              {createForm.isRecurring && (
+                <div className="space-y-3 pl-4 border-l-2 border-gray-200">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Tipo ricorrenza
+                    </label>
+                    <select
+                      value={createForm.recurrenceType || ""}
+                      onChange={(e) =>
+                        setCreateForm({ ...createForm, recurrenceType: e.target.value as any })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Seleziona...</option>
+                      <option value="EVERY_N_MONTHS">Ogni N mesi</option>
+                      <option value="CUSTOM_DATES">Date personalizzate</option>
+                    </select>
+                  </div>
+
+                  {createForm.recurrenceType === "EVERY_N_MONTHS" && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Ogni quanti mesi
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={createForm.everyNMonths}
+                        onChange={(e) =>
+                          setCreateForm({ ...createForm, everyNMonths: e.target.value })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setCreateForm({
+                    title: "",
+                    description: "",
+                    type: "OUT",
+                    amountPlanned: "",
+                    dueDate: format(new Date(), "yyyy-MM-dd"),
+                    statusId: "",
+                    isRecurring: false,
+                    recurrenceType: undefined,
+                    everyNMonths: "",
+                    customDates: [],
+                  });
+                }}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+              >
+                Annulla
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await createMovement({
+                      title: createForm.title,
+                      description: createForm.description || undefined,
+                      type: createForm.type,
+                      amountPlanned: createForm.amountPlanned
+                        ? parseFloat(createForm.amountPlanned)
+                        : undefined,
+                      dueDate: createForm.dueDate,
+                      statusId: createForm.statusId as Id<"movementStatuses">,
+                      isRecurring: createForm.isRecurring,
+                      recurrenceType: createForm.recurrenceType,
+                      everyNMonths: createForm.everyNMonths
+                        ? parseInt(createForm.everyNMonths)
+                        : undefined,
+                      customDates:
+                        createForm.customDates.length > 0 ? createForm.customDates : undefined,
+                    });
+                    setShowCreateModal(false);
+                    setCreateForm({
+                      title: "",
+                      description: "",
+                      type: "OUT",
+                      amountPlanned: "",
+                      dueDate: format(new Date(), "yyyy-MM-dd"),
+                      statusId: "",
+                      isRecurring: false,
+                      recurrenceType: undefined,
+                      everyNMonths: "",
+                      customDates: [],
+                    });
+                  } catch (error) {
+                    console.error("Error creating movement:", error);
+                  }
+                }}
+                disabled={!createForm.title || !createForm.statusId}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Salva
               </button>
             </div>
           </div>
