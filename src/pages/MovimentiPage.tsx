@@ -38,6 +38,43 @@ interface Movement {
   };
 }
 
+// Componente per visualizzare un allegato
+const AttachmentLink: React.FC<{ storageId: string; index: number }> = ({ storageId, index }) => {
+  const getAttachmentUrl = useMutation(api.movements.getAttachmentUrl);
+  const [url, setUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleClick = async () => {
+    if (url) {
+      window.open(url, "_blank");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const downloadUrl = await getAttachmentUrl({ storageId });
+      setUrl(downloadUrl);
+      if (downloadUrl) {
+        window.open(downloadUrl, "_blank");
+      }
+    } catch (error) {
+      console.error("Error getting attachment URL:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={loading}
+      className="text-xs text-blue-600 hover:text-blue-800 underline flex items-center gap-1"
+    >
+      {loading ? "Caricamento..." : `📎 Allegato ${index + 1}`}
+    </button>
+  );
+};
+
 const MovimentiPage: React.FC = () => {
   // States
   const [search, setSearch] = useState("");
@@ -66,6 +103,7 @@ const MovimentiPage: React.FC = () => {
   const markAsExecuted = useMutation(api.movements.markAsExecuted);
   const deleteMovement = useMutation(api.movements.remove);
   const createMovement = useMutation(api.movements.upsert);
+  const generateUploadUrl = useMutation(api.movements.generateUploadUrl);
 
   // State for modals
   const [selectedMovement, setSelectedMovement] = useState<Movement | null>(null);
@@ -447,11 +485,10 @@ const MovimentiPage: React.FC = () => {
                       {movement.status?.nome || "Sconosciuto"}
                     </span>
                     {movement.attachments && movement.attachments.length > 0 && (
-                      <div className="mt-1">
-                        <span className="text-xs text-blue-600">
-                          {movement.attachments.length} allegato
-                          {movement.attachments.length > 1 ? "i" : ""} 📎
-                        </span>
+                      <div className="mt-1 flex flex-col gap-1">
+                        {movement.attachments.map((storageId, idx) => (
+                          <AttachmentLink key={storageId} storageId={storageId} index={idx} />
+                        ))}
                       </div>
                     )}
                   </td>
@@ -705,8 +742,11 @@ const MovimentiPage: React.FC = () => {
               {/* File Attachments */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Allegati (max 5 file - immagini o PDF)
+                  Allegati (max 5 file - max 500KB cadauno)
                 </label>
+                <p className="text-xs text-gray-500 mb-2">
+                  PDF e immagini. Per file grandi usa un link in descrizione.
+                </p>
                 <input
                   type="file"
                   accept="image/*,application/pdf"
@@ -715,6 +755,14 @@ const MovimentiPage: React.FC = () => {
                     const files = Array.from(e.target.files || []);
                     if (files.length + selectedFiles.length > 5) {
                       alert("Massimo 5 file consentiti");
+                      return;
+                    }
+                    // Check file size (max 500KB)
+                    const oversizedFiles = files.filter((f) => f.size > 500 * 1024);
+                    if (oversizedFiles.length > 0) {
+                      alert(
+                        `File troppo grandi (max 500KB): ${oversizedFiles.map((f) => f.name).join(", ")}`
+                      );
                       return;
                     }
                     setSelectedFiles([...selectedFiles, ...files]);
@@ -774,25 +822,30 @@ const MovimentiPage: React.FC = () => {
                   try {
                     setUploading(true);
 
-                    // Convert files to base64
-                    const filePromises = selectedFiles.map((file) => {
-                      return new Promise<{ name: string; type: string; data: string }>(
-                        (resolve, reject) => {
-                          const reader = new FileReader();
-                          reader.onload = () => {
-                            resolve({
-                              name: file.name,
-                              type: file.type,
-                              data: reader.result as string,
-                            });
-                          };
-                          reader.onerror = reject;
-                          reader.readAsDataURL(file);
-                        }
-                      );
-                    });
+                    // Upload files to Convex Storage
+                    const uploadedStorageIds: string[] = [];
+                    for (const file of selectedFiles) {
+                      try {
+                        // Get upload URL from Convex
+                        const uploadUrl = await generateUploadUrl();
 
-                    const attachments = await Promise.all(filePromises);
+                        // Upload file to the returned URL
+                        const response = await fetch(uploadUrl, {
+                          method: "POST",
+                          headers: { "Content-Type": file.type },
+                          body: file,
+                        });
+
+                        if (response.ok) {
+                          const result = await response.json();
+                          uploadedStorageIds.push(result.storageId);
+                        } else {
+                          console.error("Upload failed:", await response.text());
+                        }
+                      } catch (uploadError) {
+                        console.error("Error uploading file:", uploadError);
+                      }
+                    }
 
                     await createMovement({
                       title: createForm.title,
@@ -810,7 +863,7 @@ const MovimentiPage: React.FC = () => {
                         : undefined,
                       customDates:
                         createForm.customDates.length > 0 ? createForm.customDates : undefined,
-                      attachments: attachments.length > 0 ? attachments : undefined,
+                      attachments: uploadedStorageIds.length > 0 ? uploadedStorageIds : undefined,
                     });
                     setShowCreateModal(false);
                     setCreateForm({

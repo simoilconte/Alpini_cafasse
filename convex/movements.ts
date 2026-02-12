@@ -125,15 +125,7 @@ export const upsert = mutation({
     everyNMonths: v.optional(v.number()),
     customDates: v.optional(v.array(v.string())),
     parentId: v.optional(v.id("movements")),
-    attachments: v.optional(
-      v.array(
-        v.object({
-          name: v.string(),
-          type: v.string(),
-          data: v.string(),
-        })
-      )
-    ),
+    attachments: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -308,6 +300,14 @@ export const generateUploadUrl = mutation({
     }
 
     return await ctx.storage.generateUploadUrl();
+  },
+});
+
+// Get download URL for an attachment
+export const getAttachmentUrl = mutation({
+  args: { storageId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.storage.getUrl(args.storageId);
   },
 });
 
