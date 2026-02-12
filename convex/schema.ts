@@ -274,6 +274,7 @@ const schema = defineSchema({
     executedAt: v.optional(v.number()), // Timestamp quando eseguito (pagato/incassato)
     amountActual: v.optional(v.number()),
     executedNote: v.optional(v.string()),
+    attachments: v.optional(v.array(v.string())), // Array di storage IDs (max 5)
     createdAt: v.number(),
     updatedAt: v.number(),
   })

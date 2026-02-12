@@ -125,6 +125,7 @@ export const upsert = mutation({
     everyNMonths: v.optional(v.number()),
     customDates: v.optional(v.array(v.string())),
     parentId: v.optional(v.id("movements")),
+    attachments: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -155,6 +156,7 @@ export const upsert = mutation({
         recurrenceType: args.recurrenceType,
         everyNMonths: args.everyNMonths,
         customDates: args.customDates,
+        attachments: args.attachments,
         updatedAt: now,
       });
       return args.id;
@@ -172,6 +174,7 @@ export const upsert = mutation({
         everyNMonths: args.everyNMonths,
         customDates: args.customDates,
         parentId: args.parentId,
+        attachments: args.attachments,
         createdAt: now,
         updatedAt: now,
       });
@@ -276,6 +279,27 @@ export const remove = mutation({
 
     await ctx.db.delete(args.id);
     return { success: true };
+  },
+});
+
+// Generate upload URL for file attachments
+export const generateUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    // Check permissions
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!profile || !["admin", "direttivo"].includes(profile.role)) {
+      throw new Error("Unauthorized");
+    }
+
+    return await ctx.storage.generateUploadUrl();
   },
 });
 

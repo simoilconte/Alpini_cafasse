@@ -66,6 +66,7 @@ const MovimentiPage: React.FC = () => {
   const markAsExecuted = useMutation(api.movements.markAsExecuted);
   const deleteMovement = useMutation(api.movements.remove);
   const createMovement = useMutation(api.movements.upsert);
+  const generateUploadUrl = useMutation(api.movements.generateUploadUrl);
 
   // State for modals
   const [selectedMovement, setSelectedMovement] = useState<Movement | null>(null);
@@ -87,7 +88,10 @@ const MovimentiPage: React.FC = () => {
     recurrenceType: undefined as "EVERY_N_MONTHS" | "CUSTOM_DATES" | undefined,
     everyNMonths: "",
     customDates: [] as string[],
+    attachments: [] as string[],
   });
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
 
   // Calculate filtered stats
   const calculateStats = () => {
@@ -421,6 +425,14 @@ const MovimentiPage: React.FC = () => {
                     <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
                       {movement.status?.nome || "Sconosciuto"}
                     </span>
+                    {movement.attachments && movement.attachments.length > 0 && (
+                      <div className="mt-1">
+                        <span className="text-xs text-blue-600">
+                          {movement.attachments.length} allegato
+                          {movement.attachments.length > 1 ? "i" : ""}
+                        </span>
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                     {!movement.executedAt && (
@@ -668,6 +680,49 @@ const MovimentiPage: React.FC = () => {
                   )}
                 </div>
               )}
+
+              {/* File Attachments */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Allegati (max 5 immagini)
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    if (files.length + selectedFiles.length > 5) {
+                      alert("Massimo 5 immagini consentite");
+                      return;
+                    }
+                    setSelectedFiles([...selectedFiles, ...files]);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {selectedFiles.length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    {selectedFiles.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between bg-gray-50 p-2 rounded"
+                      >
+                        <span className="text-sm truncate">{file.name}</span>
+                        <button
+                          onClick={() => {
+                            const newFiles = [...selectedFiles];
+                            newFiles.splice(index, 1);
+                            setSelectedFiles(newFiles);
+                          }}
+                          className="text-red-600 hover:text-red-800 text-sm"
+                        >
+                          Rimuovi
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex justify-end gap-3 mt-6">
@@ -685,7 +740,9 @@ const MovimentiPage: React.FC = () => {
                     recurrenceType: undefined,
                     everyNMonths: "",
                     customDates: [],
+                    attachments: [],
                   });
+                  setSelectedFiles([]);
                 }}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
               >
@@ -694,6 +751,27 @@ const MovimentiPage: React.FC = () => {
               <button
                 onClick={async () => {
                   try {
+                    setUploading(true);
+
+                    // Upload files to Convex storage
+                    const uploadedStorageIds: string[] = [];
+                    for (const file of selectedFiles) {
+                      // Get upload URL from Convex
+                      const uploadUrl = await generateUploadUrl();
+
+                      // Upload file to the returned URL
+                      const response = await fetch(uploadUrl, {
+                        method: "POST",
+                        headers: { "Content-Type": file.type },
+                        body: file,
+                      });
+
+                      if (response.ok) {
+                        const result = await response.json();
+                        uploadedStorageIds.push(result.storageId);
+                      }
+                    }
+
                     await createMovement({
                       title: createForm.title,
                       description: createForm.description || undefined,
@@ -710,6 +788,7 @@ const MovimentiPage: React.FC = () => {
                         : undefined,
                       customDates:
                         createForm.customDates.length > 0 ? createForm.customDates : undefined,
+                      attachments: uploadedStorageIds.length > 0 ? uploadedStorageIds : undefined,
                     });
                     setShowCreateModal(false);
                     setCreateForm({
@@ -723,15 +802,19 @@ const MovimentiPage: React.FC = () => {
                       recurrenceType: undefined,
                       everyNMonths: "",
                       customDates: [],
+                      attachments: [],
                     });
+                    setSelectedFiles([]);
                   } catch (error) {
                     console.error("Error creating movement:", error);
+                  } finally {
+                    setUploading(false);
                   }
                 }}
-                disabled={!createForm.title || !createForm.statusId}
+                disabled={!createForm.title || !createForm.statusId || uploading}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Salva
+                {uploading ? "Salvataggio..." : "Salva"}
               </button>
             </div>
           </div>
