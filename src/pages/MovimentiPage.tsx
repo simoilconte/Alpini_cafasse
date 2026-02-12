@@ -847,24 +847,21 @@ const MovimentiPage: React.FC = () => {
                       }
                     }
 
-                    await createMovement({
+                    const mutationArgs: Record<string, unknown> = {
                       title: createForm.title,
-                      description: createForm.description || undefined,
                       type: createForm.type,
-                      amountPlanned: createForm.amountPlanned
-                        ? parseFloat(createForm.amountPlanned)
-                        : undefined,
                       dueDate: createForm.dueDate,
                       statusId: createForm.statusId as Id<"movementStatuses">,
                       isRecurring: createForm.isRecurring,
-                      recurrenceType: createForm.recurrenceType,
-                      everyNMonths: createForm.everyNMonths
-                        ? parseInt(createForm.everyNMonths)
-                        : undefined,
-                      customDates:
-                        createForm.customDates.length > 0 ? createForm.customDates : undefined,
-                      attachments: uploadedStorageIds.length > 0 ? uploadedStorageIds : undefined,
-                    });
+                    };
+                    if (createForm.description) mutationArgs.description = createForm.description;
+                    if (createForm.amountPlanned) mutationArgs.amountPlanned = parseFloat(createForm.amountPlanned);
+                    if (createForm.recurrenceType) mutationArgs.recurrenceType = createForm.recurrenceType;
+                    if (createForm.everyNMonths) mutationArgs.everyNMonths = parseInt(createForm.everyNMonths);
+                    if (createForm.customDates.length > 0) mutationArgs.customDates = createForm.customDates;
+                    if (uploadedStorageIds.length > 0) mutationArgs.attachments = uploadedStorageIds;
+
+                    await createMovement(mutationArgs as any);
                     setShowCreateModal(false);
                     setCreateForm({
                       title: "",

@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import type { Id } from "./_generated/dataModel";
 
 // List movements con filtri avanzati
 export const list = query({
@@ -307,7 +308,7 @@ export const generateUploadUrl = mutation({
 export const getAttachmentUrl = mutation({
   args: { storageId: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.storage.getUrl(args.storageId);
+    return await ctx.storage.getUrl(args.storageId as Id<"_storage">);
   },
 });
 
