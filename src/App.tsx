@@ -1,29 +1,30 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
-import { LoginPage } from './pages/LoginPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { SociPage } from './pages/SociPage';
-import { SocioNewPage } from './pages/SocioNewPage';
-import { SocioEditPage } from './pages/SocioEditPage';
-import { SocioDetailPage } from './pages/SocioDetailPage';
-import { EventiPage } from './pages/EventiPage';
-import { EventoNewPage } from './pages/EventoNewPage';
-import { EventoDetailPage } from './pages/EventoDetailPage';
-import { EventoEditPage } from './pages/EventoEditPage';
-import { UtentiPage } from './pages/UtentiPage';
-import { RuoliPage } from './pages/RuoliPage';
-import { StatusAssociativiPage } from './pages/StatusAssociativiPage';
-import { BorseSpesaPage } from './pages/BorseSpesaPage';
-import { FamiglieBeneficiariePage } from './pages/FamiglieBeneficiariePage';
-import { FamigliaDetailPage } from './pages/FamigliaDetailPage';
-import { BorseSpesaSettingsPage } from './pages/BorseSpesaSettingsPage';
-import { RegistroConsegnePage } from './pages/RegistroConsegnePage';
-import { MagazzinoPage } from './pages/MagazzinoPage';
-import { UbicazioniPage } from './pages/UbicazioniPage';
-import { StatiAttrezzaturaPage } from './pages/StatiAttrezzaturaPage';
-import { ScadenziarioPage } from './pages/ScadenziarioPage';
-import { StatiPagamentoPage } from './pages/StatiPagamentoPage';
-import { MainLayout } from './components/layout';
+import { LoginPage } from "./pages/LoginPage";
+import { DashboardPage } from "./pages/DashboardPage";
+import { SociPage } from "./pages/SociPage";
+import { SocioNewPage } from "./pages/SocioNewPage";
+import { SocioEditPage } from "./pages/SocioEditPage";
+import { SocioDetailPage } from "./pages/SocioDetailPage";
+import { EventiPage } from "./pages/EventiPage";
+import { EventoNewPage } from "./pages/EventoNewPage";
+import { EventoDetailPage } from "./pages/EventoDetailPage";
+import { EventoEditPage } from "./pages/EventoEditPage";
+import { UtentiPage } from "./pages/UtentiPage";
+import { RuoliPage } from "./pages/RuoliPage";
+import { StatusAssociativiPage } from "./pages/StatusAssociativiPage";
+import { BorseSpesaPage } from "./pages/BorseSpesaPage";
+import { FamiglieBeneficiariePage } from "./pages/FamiglieBeneficiariePage";
+import { FamigliaDetailPage } from "./pages/FamigliaDetailPage";
+import { BorseSpesaSettingsPage } from "./pages/BorseSpesaSettingsPage";
+import { RegistroConsegnePage } from "./pages/RegistroConsegnePage";
+import { MagazzinoPage } from "./pages/MagazzinoPage";
+import { UbicazioniPage } from "./pages/UbicazioniPage";
+import { StatiAttrezzaturaPage } from "./pages/StatiAttrezzaturaPage";
+import { ScadenziarioPage } from "./pages/ScadenziarioPage";
+import { StatiPagamentoPage } from "./pages/StatiPagamentoPage";
+import MovimentiPage from "./pages/MovimentiPage";
+import { MainLayout } from "./components/layout";
 
 function LoadingScreen() {
   return (
@@ -42,14 +43,14 @@ function App() {
       <AuthLoading>
         <LoadingScreen />
       </AuthLoading>
-      
+
       <Unauthenticated>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Unauthenticated>
-      
+
       <Authenticated>
         <Routes>
           <Route element={<MainLayout />}>
@@ -75,7 +76,11 @@ function App() {
             <Route path="/magazzino/stati" element={<StatiAttrezzaturaPage />} />
             <Route path="/scadenziario" element={<ScadenziarioPage />} />
             <Route path="/scadenziario/stati" element={<StatiPagamentoPage />} />
-            <Route path="/tessere" element={<div className="p-6">Pagina Tessere - Coming Soon</div>} />
+            <Route path="/movimenti" element={<MovimentiPage />} />
+            <Route
+              path="/tessere"
+              element={<div className="p-6">Pagina Tessere - Coming Soon</div>}
+            />
             <Route path="/audit" element={<div className="p-6">Audit Log - Coming Soon</div>} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
@@ -85,4 +90,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

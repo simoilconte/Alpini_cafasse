@@ -32,7 +32,7 @@ const schema = defineSchema({
     .index("by_name", ["name"])
     .index("by_sort_order", ["sortOrder"])
     .index("by_active", ["isActive"]),
-  
+
   // Profili utente collegati all'autenticazione
   profiles: defineTable({
     userId: v.id("users"), // Collegamento a Convex Auth
@@ -63,11 +63,7 @@ const schema = defineSchema({
     cap: v.optional(v.string()),
     note: v.optional(v.string()),
     socioAttivo: v.boolean(),
-    stato: v.union(
-      v.literal("attivo"),
-      v.literal("sospeso"),
-      v.literal("dimesso")
-    ),
+    stato: v.union(v.literal("attivo"), v.literal("sospeso"), v.literal("dimesso")),
     statusId: v.optional(v.id("memberStatuses")), // Status associativo (Presidente, etc.)
     dataIscrizione: v.optional(v.string()), // Data iscrizione all'associazione (ISO date)
     createdAt: v.number(),
@@ -88,12 +84,9 @@ const schema = defineSchema({
     quotaImporto: v.number(),
     pagato: v.boolean(),
     dataPagamento: v.optional(v.string()), // ISO date string
-    metodoPagamento: v.optional(v.union(
-      v.literal("contanti"),
-      v.literal("bonifico"),
-      v.literal("pos"),
-      v.literal("altro")
-    )),
+    metodoPagamento: v.optional(
+      v.union(v.literal("contanti"), v.literal("bonifico"), v.literal("pos"), v.literal("altro"))
+    ),
     scadenza: v.string(), // ISO date string, default 31/08 endYear
     note: v.optional(v.string()),
     createdAt: v.number(),
@@ -112,11 +105,7 @@ const schema = defineSchema({
     dataInizio: v.string(), // ISO datetime string
     dataFine: v.string(), // ISO datetime string
     durataMinuti: v.number(), // Calcolato automaticamente
-    stato: v.union(
-      v.literal("pianificato"),
-      v.literal("confermato"),
-      v.literal("chiuso")
-    ),
+    stato: v.union(v.literal("pianificato"), v.literal("confermato"), v.literal("chiuso")),
     attrezzaturePreventivo: v.array(v.string()),
     note: v.optional(v.string()),
     createdAt: v.number(),
@@ -180,8 +169,7 @@ const schema = defineSchema({
     value: v.any(), // Valore (può essere array, object, etc.)
     updatedAt: v.number(),
     updatedBy: v.optional(v.id("users")),
-  })
-    .index("by_key", ["key"]),
+  }).index("by_key", ["key"]),
 
   // Ubicazioni magazzino
   warehouseLocations: defineTable({
@@ -220,7 +208,7 @@ const schema = defineSchema({
     .index("by_ubicazione", ["ubicazioneId"])
     .index("by_stato", ["statoId"]),
 
-  // Stati pagamento (configurabili da UI)
+  // Stati pagamento (configurabili da UI) - mantenere per compatibilità
   paymentStatuses: defineTable({
     nome: v.string(),
     descrizione: v.optional(v.string()),
@@ -231,7 +219,7 @@ const schema = defineSchema({
     .index("by_nome", ["nome"])
     .index("by_attivo", ["attivo"]),
 
-  // Scadenziario pagamenti (solo USCITE)
+  // Scadenziario pagamenti (solo USCITE) - mantenere per compatibilità
   payments: defineTable({
     title: v.string(),
     description: v.optional(v.string()),
@@ -254,6 +242,42 @@ const schema = defineSchema({
     .index("by_parent", ["parentId"])
     .index("by_paidAt", ["paidAt"]),
 
+  // Stati movimenti (configurabili da UI - nuovi)
+  movementStatuses: defineTable({
+    nome: v.string(),
+    descrizione: v.optional(v.string()),
+    attivo: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_nome", ["nome"])
+    .index("by_attivo", ["attivo"]),
+
+  // Scadenziario movimenti (ENTRATE + USCITE) - nuovi
+  movements: defineTable({
+    title: v.string(),
+    description: v.optional(v.string()),
+    type: v.union(v.literal("IN"), v.literal("OUT")), // IN = entrata, OUT = uscita
+    amountPlanned: v.optional(v.number()),
+    dueDate: v.string(), // ISO date YYYY-MM-DD
+    statusId: v.id("movementStatuses"),
+    isRecurring: v.boolean(),
+    recurrenceType: v.optional(v.union(v.literal("EVERY_N_MONTHS"), v.literal("CUSTOM_DATES"))),
+    everyNMonths: v.optional(v.number()),
+    customDates: v.optional(v.array(v.string())), // Array di date ISO
+    parentId: v.optional(v.id("movements")), // Per storico ricorrenze
+    executedAt: v.optional(v.number()), // Timestamp quando eseguito (pagato/incassato)
+    amountActual: v.optional(v.number()),
+    executedNote: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_dueDate", ["dueDate"])
+    .index("by_type", ["type"])
+    .index("by_status", ["statusId"])
+    .index("by_parent", ["parentId"])
+    .index("by_executedAt", ["executedAt"]),
+
   // Audit log per tracciabilità
   auditLogs: defineTable({
     entityType: v.union(
@@ -263,11 +287,7 @@ const schema = defineSchema({
       v.literal("eventParticipants")
     ),
     entityId: v.string(),
-    action: v.union(
-      v.literal("create"),
-      v.literal("update"),
-      v.literal("delete")
-    ),
+    action: v.union(v.literal("create"), v.literal("update"), v.literal("delete")),
     actorUserId: v.id("users"),
     timestamp: v.number(),
     summary: v.string(), // Descrizione dell'operazione
