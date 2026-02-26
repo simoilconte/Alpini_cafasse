@@ -19,7 +19,7 @@
  * - Req 11.2: Log event operations
  */
 
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import type { Id, Doc } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
@@ -66,6 +66,40 @@ async function createAuditLog(
     changes: params.changes,
   });
 }
+
+/**
+ * Creates an audit log entry for system-level operations (e.g., cron jobs)
+ * that don't have a user authentication context.
+ *
+ * Finds the first admin user to use as the actor. If no admin user is found,
+ * the audit log is silently skipped.
+ */
+async function createSystemAuditLog(
+  ctx: MutationCtx,
+  params: AuditLogParams
+): Promise<Id<"auditLogs"> | null> {
+  // Find an admin profile to use as the system actor
+  const adminProfile = await ctx.db
+    .query("profiles")
+    .withIndex("by_role", (q) => q.eq("role", "admin"))
+    .first();
+
+  if (!adminProfile) {
+    // No admin user found — skip audit log
+    return null;
+  }
+
+  return await ctx.db.insert("auditLogs", {
+    entityType: params.entityType,
+    entityId: params.entityId,
+    action: params.action,
+    actorUserId: adminProfile.userId,
+    timestamp: Date.now(),
+    summary: params.summary,
+    changes: params.changes,
+  });
+}
+
 
 /**
  * Calculates duration in minutes between two ISO datetime strings.
@@ -148,6 +182,21 @@ function calculateEventChanges(
 
   return changes;
 }
+
+/**
+ * Allowed state transitions map.
+ * Defines which target states are reachable from each current state.
+ *
+ * Requirements:
+ * - Req 1.1: pianificato → confermato, confermato → chiuso, pianificato → chiuso
+ * - Req 1.2: All other transitions are rejected
+ */
+const ALLOWED_TRANSITIONS: Record<string, string[]> = {
+  pianificato: ["confermato", "chiuso"],
+  confermato: ["chiuso"],
+  chiuso: [],
+};
+
 
 // ============================================================================
 // Mutations
@@ -250,10 +299,10 @@ export const updateEvent = mutation({
       throw new Error("Evento non trovato");
     }
 
-    // Validate not closed (Req 6.4) - unless we're just closing it
-    if (existingEvent.stato === "chiuso" && args.stato !== "chiuso") {
-      throw new Error("Non è possibile modificare un evento chiuso");
-    }
+    // Validate not closed (Req 6.4, Req 1.4)
+    // All modifications are rejected for closed events.
+    // State transitions must go through updateEventStatus.
+    validateNotClosed(existingEvent);
 
     // Build update object
     const updateData: Partial<Doc<"events">> = {
@@ -352,6 +401,137 @@ export const closeEvent = mutation({
     return await ctx.db.get(args.eventId);
   },
 });
+
+/**
+ * Updates the status of an event following allowed transitions.
+ *
+ * Requirements:
+ * - Req 1.1: Allow pianificato→confermato, confermato→chiuso, pianificato→chiuso
+ * - Req 1.2: Reject invalid transitions with descriptive error
+ * - Req 1.3: Log transition in audit log
+ */
+export const updateEventStatus = mutation({
+  args: {
+    eventId: v.id("events"),
+    newStatus: v.union(
+      v.literal("confermato"),
+      v.literal("chiuso")
+    ),
+  },
+  handler: async (ctx, args) => {
+    // Check permissions
+    await requireAdminOrDirettivo(ctx);
+
+    // Fetch event
+    const event = await ctx.db.get(args.eventId);
+    if (!event) {
+      throw new Error("Evento non trovato");
+    }
+
+    // Validate transition
+    const allowed = ALLOWED_TRANSITIONS[event.stato] ?? [];
+    if (!allowed.includes(args.newStatus)) {
+      throw new Error(
+        `Transizione non consentita: da ${event.stato} a ${args.newStatus}`
+      );
+    }
+
+    const now = Date.now();
+
+    // Patch event
+    await ctx.db.patch(args.eventId, {
+      stato: args.newStatus,
+      updatedAt: now,
+    });
+
+    // Create audit log
+    await createAuditLog(ctx, {
+      entityType: "events",
+      entityId: args.eventId,
+      action: "update",
+      summary: `Stato cambiato da ${event.stato} a ${args.newStatus}`,
+      changes: {
+        stato: {
+          old: event.stato,
+          new: args.newStatus,
+        },
+      },
+    });
+
+    return await ctx.db.get(args.eventId);
+  },
+});
+
+/**
+ * Auto-closes expired confirmed events.
+ *
+ * Called by the cron job to find all events with stato "confermato"
+ * whose dataFine has passed, and transitions them to "chiuso".
+ *
+ * Requirements:
+ * - Req 4.1: Periodic check on confirmed events
+ * - Req 4.2: Close events whose dataFine < now
+ * - Req 4.3: Log automatic closure in audit log
+ * - Req 4.4: Continue on individual errors
+ */
+export const autoCloseExpiredEvents = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = new Date().toISOString();
+    const nowTimestamp = Date.now();
+
+    // Query confirmed events using by_stato index
+    const confirmedEvents = await ctx.db
+      .query("events")
+      .withIndex("by_stato", (q) => q.eq("stato", "confermato"))
+      .collect();
+
+    // Filter: dataFine < now (ISO string comparison)
+    const expiredEvents = confirmedEvents.filter(
+      (e) => e.dataFine < now
+    );
+
+    let closedCount = 0;
+    const errors: Array<{ eventId: string; error: string }> = [];
+
+    for (const event of expiredEvents) {
+      try {
+        // Patch stato to "chiuso" and update timestamp
+        await ctx.db.patch(event._id, {
+          stato: "chiuso" as const,
+          updatedAt: nowTimestamp,
+        });
+
+        // Create audit log entry for automatic closure
+        await createSystemAuditLog(ctx, {
+          entityType: "events",
+          entityId: event._id,
+          action: "update",
+          summary: `Auto-chiusura: evento scaduto "${event.nome}"`,
+          changes: {
+            stato: {
+              old: "confermato",
+              new: "chiuso",
+            },
+          },
+        });
+
+        closedCount++;
+      } catch (error) {
+        // Log error and continue with next event (Req 4.4)
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        errors.push({ eventId: event._id, error: errorMessage });
+        console.error(
+          `Auto-chiusura fallita per evento ${event._id}: ${errorMessage}`
+        );
+      }
+    }
+
+    return { closedCount, errors };
+  },
+});
+
+
 
 /**
  * Deletes an event and all associated participations.
@@ -581,3 +761,75 @@ export const getEventStats = query({
     return stats;
   },
 });
+
+/**
+ * Lists closed events for a specific month with participant counts.
+ *
+ * Uses the `by_stato` index to query only closed events, then filters
+ * in-memory by `dataInizio` falling within the specified month range.
+ * Results are sorted by `dataInizio` ascending.
+ *
+ * Requirements:
+ * - Req 7.1: Query by year and month, return closed events in that month
+ * - Req 7.2: Sort results by dataInizio ascending
+ * - Req 7.3: Include nome, dataInizio, dataFine, localita, durataMinuti, participantCount
+ */
+export const listClosedEventsByMonth = query({
+  args: {
+    year: v.number(),
+    month: v.number(), // 1-12
+  },
+  handler: async (ctx, args) => {
+    // Calculate month range as ISO strings for string comparison
+    const monthStr = String(args.month).padStart(2, "0");
+    const startOfMonth = `${args.year}-${monthStr}-01T00:00:00`;
+
+    // Calculate start of next month
+    let nextYear = args.year;
+    let nextMonth = args.month + 1;
+    if (nextMonth > 12) {
+      nextMonth = 1;
+      nextYear += 1;
+    }
+    const nextMonthStr = String(nextMonth).padStart(2, "0");
+    const startOfNextMonth = `${nextYear}-${nextMonthStr}-01T00:00:00`;
+
+    // Query closed events using by_stato index
+    const closedEvents = await ctx.db
+      .query("events")
+      .withIndex("by_stato", (q) => q.eq("stato", "chiuso"))
+      .collect();
+
+    // Filter in-memory: dataInizio within the specified month
+    const eventsInMonth = closedEvents.filter(
+      (e) => e.dataInizio >= startOfMonth && e.dataInizio < startOfNextMonth
+    );
+
+    // Sort by dataInizio ascending
+    eventsInMonth.sort((a, b) => a.dataInizio.localeCompare(b.dataInizio));
+
+    // Count participants for each event
+    const results = await Promise.all(
+      eventsInMonth.map(async (event) => {
+        const participants = await ctx.db
+          .query("eventParticipants")
+          .withIndex("by_event", (q) => q.eq("eventId", event._id))
+          .collect();
+
+        return {
+          _id: event._id,
+          nome: event.nome,
+          dataInizio: event.dataInizio,
+          dataFine: event.dataFine,
+          localita: event.localita,
+          durataMinuti: event.durataMinuti,
+          participantCount: participants.length,
+        };
+      })
+    );
+
+    return results;
+  },
+});
+
+

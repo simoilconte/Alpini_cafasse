@@ -199,13 +199,16 @@ export function EventoDetailPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [showAddParticipant, setShowAddParticipant] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState<string>('');
+  const [statusError, setStatusError] = useState<string | null>(null);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   const event = useQuery(api.events.getEvent, id ? { eventId: id as Id<"events"> } : "skip");
   const participants = useQuery(api.eventParticipants.getEventParticipants, id ? { eventId: id as Id<"events"> } : "skip");
   const availableMembers = useQuery(api.eventParticipants.getAvailableMembers, id ? { eventId: id as Id<"events"> } : "skip");
   const profile = useQuery(api.profiles.getCurrentProfile);
 
-  const closeEvent = useMutation(api.events.closeEvent);
+  const updateEventStatus = useMutation(api.events.updateEventStatus);
   const deleteEvent = useMutation(api.events.deleteEvent);
   const addParticipant = useMutation(api.eventParticipants.addParticipant);
   const removeParticipant = useMutation(api.eventParticipants.removeParticipant);
@@ -215,13 +218,33 @@ export function EventoDetailPage() {
   const isLoading = event === undefined;
   const isClosed = event?.stato === 'chiuso';
 
+  const handleConfirmEvent = async () => {
+    if (!id) return;
+    setStatusError(null);
+    setIsConfirming(true);
+    try {
+      await updateEventStatus({ eventId: id as Id<"events">, newStatus: "confermato" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Errore durante la conferma dell'evento";
+      setStatusError(message);
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
   const handleCloseEvent = async () => {
     if (!id) return;
+    setStatusError(null);
+    setIsClosing(true);
     try {
-      await closeEvent({ eventId: id as Id<"events"> });
+      await updateEventStatus({ eventId: id as Id<"events">, newStatus: "chiuso" });
       setIsCloseDialogOpen(false);
     } catch (error) {
-      console.error('Error closing event:', error);
+      const message = error instanceof Error ? error.message : "Errore durante la chiusura dell'evento";
+      setStatusError(message);
+      setIsCloseDialogOpen(false);
+    } finally {
+      setIsClosing(false);
     }
   };
 
@@ -294,6 +317,7 @@ export function EventoDetailPage() {
         confirmLabel="Chiudi evento"
         cancelLabel="Annulla"
         variant="warning"
+        isLoading={isClosing}
         onConfirm={handleCloseEvent}
         onCancel={() => setIsCloseDialogOpen(false)}
       />
@@ -308,6 +332,29 @@ export function EventoDetailPage() {
         onConfirm={handleDeleteEvent}
         onCancel={() => setIsDeleteDialogOpen(false)}
       />
+
+      {/* Error toast */}
+      {statusError && (
+        <div className="fixed top-4 right-4 z-50 max-w-sm animate-in slide-in-from-top-2 duration-200">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg flex items-start gap-3">
+            <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-red-800">Errore</p>
+              <p className="text-sm text-red-600 mt-1">{statusError}</p>
+            </div>
+            <button
+              onClick={() => setStatusError(null)}
+              className="text-red-400 hover:text-red-600 flex-shrink-0"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
@@ -336,9 +383,18 @@ export function EventoDetailPage() {
                 >
                   Modifica
                 </Link>
+                {event.stato === 'pianificato' && (
+                  <button
+                    onClick={handleConfirmEvent}
+                    disabled={isConfirming}
+                    className="px-3 py-2 text-sm font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {isConfirming ? 'Confermando...' : 'Conferma'}
+                  </button>
+                )}
                 <button
                   onClick={() => setIsCloseDialogOpen(true)}
-                  className="px-3 py-2 text-sm font-medium text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-lg hover:bg-yellow-100"
+                  className="px-3 py-2 text-sm font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors"
                 >
                   Chiudi
                 </button>
@@ -489,5 +545,6 @@ export function EventoDetailPage() {
     </div>
   );
 }
+
 
 export default EventoDetailPage;

@@ -10,7 +10,10 @@
  */
 
 import { Link } from 'react-router-dom';
+import { useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
 import type { Id } from '../../../convex/_generated/dataModel';
+import { useState } from 'react';
 
 interface EventCardProps {
   event: {
@@ -24,6 +27,7 @@ interface EventCardProps {
     participantCount?: number;
     totalOre?: number;
   };
+  canEdit?: boolean;
 }
 
 /**
@@ -78,7 +82,24 @@ function StatoBadge({ stato }: { stato: 'pianificato' | 'confermato' | 'chiuso' 
   );
 }
 
-export function EventCard({ event }: EventCardProps) {
+export function EventCard({ event, canEdit = false }: EventCardProps) {
+  const updateEventStatus = useMutation(api.events.updateEventStatus);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleStatusChange = async (e: React.MouseEvent, newStatus: "confermato" | "chiuso") => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isUpdating) return;
+    setIsUpdating(true);
+    try {
+      await updateEventStatus({ eventId: event._id, newStatus });
+    } catch (error) {
+      console.error('Error updating event status:', error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <Link
       to={`/eventi/${event._id}`}
@@ -151,13 +172,33 @@ export function EventCard({ event }: EventCardProps) {
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-2 bg-slate-50 border-t border-slate-100">
+      <div className="px-4 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
         <span className="text-xs text-blue-600 font-medium flex items-center gap-1">
           Visualizza dettagli
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </span>
+        {canEdit && event.stato !== 'chiuso' && (
+          <div className="flex items-center gap-2">
+            {event.stato === 'pianificato' && (
+              <button
+                onClick={(e) => handleStatusChange(e, 'confermato')}
+                disabled={isUpdating}
+                className="px-2 py-1 text-xs font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded hover:bg-teal-100 disabled:opacity-50 transition-colors"
+              >
+                Conferma
+              </button>
+            )}
+            <button
+              onClick={(e) => handleStatusChange(e, 'chiuso')}
+              disabled={isUpdating}
+              className="px-2 py-1 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded hover:bg-amber-100 disabled:opacity-50 transition-colors"
+            >
+              Chiudi
+            </button>
+          </div>
+        )}
       </div>
     </Link>
   );

@@ -17,6 +17,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { EventCard } from '../components/events';
+import { MonthlyCalendar } from '../components/events';
 
 type StatoFilter = 'tutti' | 'confermato' | 'chiuso';
 
@@ -76,12 +77,16 @@ function EmptyState({ filter }: { filter: StatoFilter }) {
 
 export function EventiPage() {
   const [statoFilter, setStatoFilter] = useState<StatoFilter>('tutti');
+  const now = new Date();
+  const [calendarYear, setCalendarYear] = useState(now.getFullYear());
+  const [calendarMonth, setCalendarMonth] = useState(now.getMonth() + 1);
   const profile = useQuery(api.profiles.getCurrentProfile);
-  const canCreate = profile?.role === 'admin' || profile?.role === 'direttivo';
+  const canEdit = profile?.role === 'admin' || profile?.role === 'direttivo';
 
-  // Fetch events with filter
-  const events = useQuery(api.events.listEvents, 
-    statoFilter === 'tutti' ? {} : { stato: statoFilter }
+  // Fetch events with filter (skip when showing calendar for 'chiuso')
+  const events = useQuery(
+    api.events.listEvents,
+    statoFilter === 'chiuso' ? 'skip' : (statoFilter === 'tutti' ? {} : { stato: statoFilter })
   );
 
   const isLoading = events === undefined;
@@ -109,7 +114,7 @@ export function EventiPage() {
               </div>
             </div>
 
-            {canCreate && (
+            {canEdit && (
               <Link to="/eventi/new" className="btn-primary text-sm flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -144,7 +149,16 @@ export function EventiPage() {
 
       {/* Main content */}
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {isLoading ? (
+        {statoFilter === 'chiuso' ? (
+          <MonthlyCalendar
+            year={calendarYear}
+            month={calendarMonth}
+            onMonthChange={(y, m) => {
+              setCalendarYear(y);
+              setCalendarMonth(m);
+            }}
+          />
+        ) : isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <EventCardSkeleton key={i} />
@@ -153,7 +167,7 @@ export function EventiPage() {
         ) : events && events.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {events.map((event) => (
-              <EventCard key={event._id} event={event} />
+              <EventCard key={event._id} event={event} canEdit={canEdit} />
             ))}
           </div>
         ) : (
