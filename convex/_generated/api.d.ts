@@ -13,6 +13,7 @@ import type * as auth from "../auth.js";
 import type * as bagDeliveries from "../bagDeliveries.js";
 import type * as beneficiaryFamilies from "../beneficiaryFamilies.js";
 import type * as checkDatabase from "../checkDatabase.js";
+import type * as crons from "../crons.js";
 import type * as equipment from "../equipment.js";
 import type * as equipmentStatuses from "../equipmentStatuses.js";
 import type * as eventParticipants from "../eventParticipants.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   bagDeliveries: typeof bagDeliveries;
   beneficiaryFamilies: typeof beneficiaryFamilies;
   checkDatabase: typeof checkDatabase;
+  crons: typeof crons;
   equipment: typeof equipment;
   equipmentStatuses: typeof equipmentStatuses;
   eventParticipants: typeof eventParticipants;
