@@ -13,7 +13,7 @@ export function MainLayout() {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         {/* Mobile header */}
-        <header className="lg:hidden bg-[#2D2D2D] text-white p-4 flex items-center gap-4 sticky top-0 z-40">
+        <header className="lg:hidden bg-[#808000] text-white p-4 flex items-center gap-4 sticky top-0 z-40">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-1 hover:bg-white/10 rounded-lg transition-colors"
@@ -22,8 +22,8 @@ export function MainLayout() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <img src="/logo.png" alt="Maestrale" className="h-8 w-auto" />
-          <span className="font-bold">MAESTRALE ODV</span>
+          <img src="/logo.png" alt="Gruppo Alpini Cafasse" className="h-8 w-auto" />
+          <span className="font-bold">GRUPPO ALPINI CAFASSE</span>
         </header>
 
         {/* Page content */}

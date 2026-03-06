@@ -86,7 +86,7 @@ export function ChangePasswordPage() {
       <div className="card max-w-md w-full">
         {/* Header with Logo */}
         <div className="text-center mb-6">
-          <img src="/logo.png" alt="Maestrale ODV" className="mx-auto mb-4 h-24 w-auto" />
+          <img src="/logo.png" alt="Gruppo Alpini Cafasse" className="mx-auto mb-4 h-24 w-auto" />
           <h1 className="text-2xl font-bold mb-2">Cambio Password Richiesto</h1>
           <p className="text-gray-600">
             L'amministratore ha richiesto il cambio della tua password

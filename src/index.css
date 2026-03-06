@@ -1,30 +1,30 @@
 @import "tailwindcss";
 
-/* MAESTRALE ODV - Custom Theme
-   Colori ispirati al logo:
-   - Grigio scuro: #2D2D2D (elementi principali, testo)
-   - Rosso italiano: #C41E3A (accento primario)
-   - Verde italiano: #009246 (successo, conferme)
+/* GRUPPO ALPINI CAFASSE - Custom Theme
+   Colori ispirati al tema alpino:
+   - Verde militare: #808000 (elementi principali)
+   - Verde scuro: #5a5a00 (hover, accenti)
+   - Verde oliva chiaro: #9a9a00 (accento secondario)
    - Bianco: #FFFFFF (sfondo)
    - Grigio chiaro: #F5F5F5 (sfondo secondario)
 */
 
 @layer base {
   :root {
-    /* Colori Maestrale */
-    --color-primary: #2D2D2D;
-    --color-primary-dark: #1a1a1a;
-    --color-accent: #C41E3A;
-    --color-accent-dark: #a01830;
-    --color-success: #009246;
-    --color-success-dark: #007a3a;
+    /* Colori Gruppo Alpini Cafasse */
+    --color-primary: #808000;
+    --color-primary-dark: #5a5a00;
+    --color-accent: #556B2F;
+    --color-accent-dark: #3d4e22;
+    --color-success: #6B8E23;
+    --color-success-dark: #556B1C;
     --color-warning: #f59e0b;
     --color-error: #C41E3A;
     --color-background: #ffffff;
     --color-surface: #F5F5F5;
-    --color-text: #2D2D2D;
-    --color-text-secondary: #6B6B6B;
-    --color-border: #E0E0E0;
+    --color-text: #3d3d00;
+    --color-text-secondary: #6B6B4B;
+    --color-border: #D4D4A0;
   }
 
   html {
@@ -35,13 +35,13 @@
 
   body {
     background-color: #F5F5F5;
-    color: #2D2D2D;
+    color: #3d3d00;
     min-height: 100vh;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
-    color: #2D2D2D;
+    color: #3d3d00;
   }
 }
 
@@ -60,7 +60,7 @@
 .btn:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #2D2D2D;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #808000;
 }
 
 .btn:disabled {
@@ -73,7 +73,7 @@
   border-radius: 0.5rem;
   font-weight: 600;
   transition: all 0.2s;
-  background-color: #2D2D2D;
+  background-color: #808000;
   color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -81,13 +81,13 @@
 }
 
 .btn-primary:hover {
-  background-color: #1a1a1a;
+  background-color: #5a5a00;
 }
 
 .btn-primary:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #2D2D2D;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #808000;
 }
 
 .btn-primary:disabled {
@@ -100,7 +100,7 @@
   border-radius: 0.5rem;
   font-weight: 600;
   transition: all 0.2s;
-  background-color: #C41E3A;
+  background-color: #556B2F;
   color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -108,13 +108,13 @@
 }
 
 .btn-accent:hover {
-  background-color: #a01830;
+  background-color: #3d4e22;
 }
 
 .btn-accent:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #C41E3A;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #556B2F;
 }
 
 .btn-accent:disabled {
@@ -128,7 +128,7 @@
   font-weight: 600;
   transition: all 0.2s;
   background-color: #E0E0E0;
-  color: #2D2D2D;
+  color: #808000;
   text-transform: uppercase;
   letter-spacing: 0.025em;
   font-size: 0.875rem;
@@ -154,7 +154,7 @@
   border-radius: 0.5rem;
   font-weight: 600;
   transition: all 0.2s;
-  background-color: #009246;
+  background-color: #6B8E23;
   color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -162,13 +162,13 @@
 }
 
 .btn-success:hover {
-  background-color: #007a3a;
+  background-color: #556B1C;
 }
 
 .btn-success:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #009246;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #6B8E23;
 }
 
 .btn-success:disabled {
@@ -216,7 +216,7 @@
 }
 
 .input:focus {
-  border-color: #2D2D2D;
+  border-color: #808000;
   box-shadow: none;
 }
 
@@ -234,7 +234,7 @@
 }
 
 .card-header {
-  border-bottom: 2px solid #2D2D2D;
+  border-bottom: 2px solid #808000;
   padding-bottom: 0.75rem;
   margin-bottom: 1rem;
 }
@@ -244,7 +244,7 @@
   display: block;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #2D2D2D;
+  color: #808000;
   margin-bottom: 0.375rem;
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -271,7 +271,7 @@
 
 .badge-success {
   background-color: #D1FAE5;
-  color: #009246;
+  color: #6B8E23;
 }
 
 .badge-warning {
@@ -286,12 +286,12 @@
 
 .badge-neutral {
   background-color: #E5E7EB;
-  color: #2D2D2D;
+  color: #808000;
 }
 
 /* Navigation header */
 .nav-header {
-  background-color: #2D2D2D;
+  background-color: #808000;
   color: #ffffff;
   padding: 1rem;
 }
@@ -305,16 +305,16 @@
   background-color: #ffffff;
   border-radius: 0.75rem;
   padding: 1.25rem;
-  border-left: 4px solid #2D2D2D;
+  border-left: 4px solid #808000;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .stat-card-accent {
-  border-left-color: #C41E3A;
+  border-left-color: #556B2F;
 }
 
 .stat-card-success {
-  border-left-color: #009246;
+  border-left-color: #6B8E23;
 }
 
 /* Mobile-first responsive utilities */

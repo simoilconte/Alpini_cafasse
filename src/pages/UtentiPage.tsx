@@ -175,7 +175,7 @@ export function UtentiPage() {
                 <tr key={user._id} className="hover:bg-gray-50">
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-[#2D2D2D] rounded-full flex items-center justify-center text-white font-semibold">
+                      <div className="w-10 h-10 bg-[#808000] rounded-full flex items-center justify-center text-white font-semibold">
                         {user.email.charAt(0).toUpperCase()}
                       </div>
                       <span className="font-medium">{user.email}</span>

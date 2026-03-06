@@ -72,21 +72,6 @@ const navigation: NavItem[] = [
     direttivoOnly: true,
   },
   {
-    name: "Borse Spesa",
-    href: "/borse-spesa",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-        />
-      </svg>
-    ),
-    permission: "borseSpesa",
-  },
-  {
     name: "Scadenziario",
     href: "/scadenziario",
     icon: (
@@ -175,12 +160,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const isAdmin = profile?.role === "admin";
   const isDirettivo = profile?.role === "admin" || profile?.role === "direttivo";
-  const canAccessBorseSpesa = ["admin", "direttivo", "operatore"].includes(profile?.role || "");
 
   const filteredNavigation = navigation.filter((item) => {
     if (item.adminOnly && !isAdmin) return false;
     if (item.direttivoOnly && !isDirettivo) return false;
-    if (item.permission === "borseSpesa" && !canAccessBorseSpesa) return false;
     return true;
   });
 
@@ -196,7 +179,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 z-50 h-screen w-64 bg-[#2D2D2D] text-white
+          fixed top-0 left-0 z-50 h-screen w-64 bg-[#808000] text-white
           transform transition-transform duration-300 ease-in-out
           flex flex-col
           lg:translate-x-0 lg:sticky lg:top-0 lg:z-auto lg:h-screen
@@ -205,10 +188,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       >
         {/* Logo */}
         <div className="flex items-center gap-3 p-4 border-b border-white/10">
-          <img src="/logo.png" alt="Maestrale" className="h-10 w-auto" />
+          <img src="/logo.png" alt="Gruppo Alpini Cafasse" className="h-10 w-auto" />
           <div>
-            <h1 className="font-bold text-lg tracking-wide text-white">MAESTRALE</h1>
-            <p className="text-xs text-white/60">ODV</p>
+            <h1 className="font-bold text-lg tracking-wide text-white">ALPINI CAFASSE</h1>
+            <p className="text-xs text-white/60">Gruppo</p>
           </div>
         </div>
 

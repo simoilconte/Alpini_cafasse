@@ -260,7 +260,7 @@ export function DashboardPage() {
     return (
       <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center">
         <div className="text-center">
-          <img src="/logo.png" alt="Maestrale" className="h-20 w-auto mx-auto mb-4 animate-pulse" />
+          <img src="/logo.png" alt="Gruppo Alpini Cafasse" className="h-20 w-auto mx-auto mb-4 animate-pulse" />
           <p className="text-gray-600">Caricamento profilo...</p>
         </div>
       </div>

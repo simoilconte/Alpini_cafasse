@@ -143,8 +143,8 @@ export function LoginPage() {
       <div className="card max-w-md w-full">
         {/* Header with Logo */}
         <div className="text-center mb-6">
-          <img src="/logo.png" alt="Maestrale ODV" className="mx-auto mb-4 h-24 w-auto" />
-          <h1 className="text-2xl font-bold mb-2">MAESTRALE ODV</h1>
+          <img src="/logo.png" alt="Gruppo Alpini Cafasse" className="mx-auto mb-4 h-24 w-auto" />
+          <h1 className="text-2xl font-bold mb-2">GRUPPO ALPINI CAFASSE</h1>
           <p className="text-gray-600">
             {mode === "login" ? "Accedi al tuo account" : "Crea un nuovo account"}
           </p>

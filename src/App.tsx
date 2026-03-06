@@ -16,11 +16,6 @@ import { EventoEditPage } from "./pages/EventoEditPage";
 import { UtentiPage } from "./pages/UtentiPage";
 import { RuoliPage } from "./pages/RuoliPage";
 import { StatusAssociativiPage } from "./pages/StatusAssociativiPage";
-import { BorseSpesaPage } from "./pages/BorseSpesaPage";
-import { FamiglieBeneficiariePage } from "./pages/FamiglieBeneficiariePage";
-import { FamigliaDetailPage } from "./pages/FamigliaDetailPage";
-import { BorseSpesaSettingsPage } from "./pages/BorseSpesaSettingsPage";
-import { RegistroConsegnePage } from "./pages/RegistroConsegnePage";
 import { MagazzinoPage } from "./pages/MagazzinoPage";
 import { UbicazioniPage } from "./pages/UbicazioniPage";
 import { StatiAttrezzaturaPage } from "./pages/StatiAttrezzaturaPage";
@@ -34,7 +29,7 @@ function LoadingScreen() {
   return (
     <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center">
       <div className="text-center">
-        <img src="/logo.png" alt="Maestrale" className="h-20 w-auto mx-auto mb-4 animate-pulse" />
+        <img src="/logo.png" alt="Gruppo Alpini Cafasse" className="h-20 w-auto mx-auto mb-4 animate-pulse" />
         <p className="text-gray-600">Caricamento...</p>
       </div>
     </div>
@@ -75,11 +70,6 @@ function App() {
             <Route path="/utenti" element={<UtentiPage />} />
             <Route path="/ruoli" element={<RuoliPage />} />
             <Route path="/status-associativi" element={<StatusAssociativiPage />} />
-            <Route path="/borse-spesa" element={<BorseSpesaPage />} />
-            <Route path="/borse-spesa/registro" element={<RegistroConsegnePage />} />
-            <Route path="/borse-spesa/famiglie" element={<FamiglieBeneficiariePage />} />
-            <Route path="/borse-spesa/famiglie/:id" element={<FamigliaDetailPage />} />
-            <Route path="/borse-spesa/impostazioni" element={<BorseSpesaSettingsPage />} />
             <Route path="/magazzino" element={<MagazzinoPage />} />
             <Route path="/magazzino/ubicazioni" element={<UbicazioniPage />} />
             <Route path="/magazzino/stati" element={<StatiAttrezzaturaPage />} />
